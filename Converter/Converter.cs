@@ -108,8 +108,8 @@ namespace Converter
             struct Face
             {
                 
-                private const string FloatPattern = @"[0-9]*(?:\.[0-9]*)?$";
-                private static readonly Regex OnlyVertices = new Regex($"^{FloatPattern}");
+                private const string NumberPattern = @"\d$";
+                private static readonly Regex OnlyVertices = new Regex($"^{NumberPattern}");
                 
                 private List<int> geometricVertexReferences;
                 private List<int> textureVertexReferences;
@@ -117,32 +117,37 @@ namespace Converter
                 
                 public static Face Parse(string str)
                 {
-                    //1//1 2//2 3//3 4//4
-                    Regex usedPattern = DetermineMatchingPattern(str);
+                    var usedPattern = DetermineMatchingPattern(str);
+                    var faceElementsPerLine = str.Split(' ');
 
-                    var faceLine = str.Split(' ');
-                    foreach (var faceStr in faceLine)
+                    var face = new Face
+                    {
+                        geometricVertexReferences = new List<int>(),
+                        textureVertexReferences = new List<int>(),
+                        normalVertexReferences = new List<int>()
+                    };
+
+                    //1//1 in 1//1 2//2 3//3 4//4
+                    foreach (var faceStr in faceElementsPerLine)
                     {
                         if (usedPattern != null && usedPattern.IsMatch(faceStr))
                         {
-                            return ParseBasedOnPattern(usedPattern, faceStr);
+                            //1
+                            if (usedPattern == OnlyVertices)
+                            {
+                                var vertex = int.Parse(faceStr);
+                                face.geometricVertexReferences.Add(vertex);
+                            }
                         }
-                        return new Face();
-                        //TODO: throw                     
+                        else
+                        {
+                            return new Face();
+                            //TODO: throw   
+                        } 
                     }
-                    return new Face();
+                    return face;
                 }
 
-                private static Face ParseBasedOnPattern(Regex pattern, string faceStr)
-                {
-                    var result = new Face();
-                    if (pattern == OnlyVertices)
-                    {
-                        
-                    }
-
-                    return result;
-                }
 
                 private static Regex DetermineMatchingPattern(string str)
                 {
@@ -218,9 +223,8 @@ namespace Converter
                     Console.WriteLine("Invalid obj format");
                     //TODO: throw
                 }
-                
             }
-        }
-        
+            Console.WriteLine("{0}{1}", geometricVertices, faces);
+        }  
     }
 }
