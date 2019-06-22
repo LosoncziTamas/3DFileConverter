@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Converter
 {
@@ -43,6 +44,7 @@ namespace Converter
                 private float y;
                 private float z;
                 private float w;
+                // TODO: reference number?
                 
                 public GeometricVertex(float x, float y, float z, float w)
                 {
@@ -105,7 +107,63 @@ namespace Converter
 
             struct Face
             {
-                //TODO   
+                
+                private const string FloatPattern = @"[0-9]*(?:\.[0-9]*)?$";
+                private static readonly Regex OnlyVertices = new Regex($"^{FloatPattern}");
+                
+                private List<int> geometricVertexReferences;
+                private List<int> textureVertexReferences;
+                private List<int> normalVertexReferences;
+                
+                public static Face Parse(string str)
+                {
+                    //1//1 2//2 3//3 4//4
+                    Regex usedPattern = DetermineMatchingPattern(str);
+
+                    var faceLine = str.Split(' ');
+                    foreach (var faceStr in faceLine)
+                    {
+                        if (usedPattern != null && usedPattern.IsMatch(faceStr))
+                        {
+                            return ParseBasedOnPattern(usedPattern, faceStr);
+                        }
+                        return new Face();
+                        //TODO: throw                     
+                    }
+                    return new Face();
+                }
+
+                private static Face ParseBasedOnPattern(Regex pattern, string faceStr)
+                {
+                    var result = new Face();
+                    if (pattern == OnlyVertices)
+                    {
+                        
+                    }
+
+                    return result;
+                }
+
+                private static Regex DetermineMatchingPattern(string str)
+                {
+                    var firstFaceLen = str.IndexOf(' ');
+                    Regex usedPattern = null;
+                    if (firstFaceLen > 0)
+                    {
+                        var firstFace = str.Substring(0, firstFaceLen);
+                        if (OnlyVertices.IsMatch(firstFace))
+                        {
+                            usedPattern = OnlyVertices;
+                        }
+                    }
+                    else
+                    {
+                        //TODO throw
+                        Console.WriteLine("{0} invalid face format", str);
+                    }
+
+                    return usedPattern;
+                }
             }
             
             
@@ -114,6 +172,8 @@ namespace Converter
             var lines = TestObjFile.Split('\n');
 
             var geometricVertices = new List<GeometricVertex>();
+            var faces = new List<Face>();
+            // TODO: add 'global' face pattern variable
             
             foreach (var line in lines)
             {
@@ -140,9 +200,12 @@ namespace Converter
                             var vertex = GeometricVertex.Parse(remainder);
                             geometricVertices.Add(vertex);
                             break;
+                        case "f":
+                            var face = Face.Parse(remainder);
+                            faces.Add(face);
+                            break;
                         case "vt":
                         case "vn":
-                        case "f":
                             Console.WriteLine("{0} processed", trimmedLine);
                             break;
                         default:
