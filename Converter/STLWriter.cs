@@ -3,35 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Numerics;
+using Converter.Documents;
 
 namespace Converter
 {
-    public class STLWriter
+    public class StlWriter : Converter.IDocumentWriter<StlDocument>
     {
-        public struct Triangle
-        {
-            private Vector3[] vertices;
-            private Vector3 norm;
-            private UInt16 attributeByteCount;
-
-            public Triangle(Vector3 norm, Vector3[] vertices)
-            {
-                this.vertices = vertices;
-                this.norm = norm;
-                attributeByteCount = 0;
-            }
-            
-            public void Write(BinaryWriter writer)
-            {
-                norm.Write(writer);
-                for (var i = 0; i < 3; ++i)
-                {
-                    vertices[i].Write(writer);
-                }
-                writer.Write(attributeByteCount);
-            }
-        }
-
 
         private static void DummyNormalization()
         {
@@ -46,7 +23,7 @@ namespace Converter
             norm = Vector3.Normalize(norm);
         }
         
-        public static void WriteDummySTLFile()
+        private static void WriteDummySTLFile()
         {
             var box = new List<Triangle>
             {
@@ -155,17 +132,17 @@ namespace Converter
                 )
             };
             
-            WriteBinary(box, File.Open("box.stl", FileMode.Create));
+            // Write(File.Open("box.stl", FileMode.Create), new StlDocument(box));
         }
 
-        public static void WriteBinary(List<Triangle> triangles, Stream stream)
+        public void Write(Stream stream, StlDocument d)
         {
             using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
             {
                 var header = new byte[80];
                 writer.Write(header);
-                writer.Write((UInt32) triangles.Count);
-                triangles.ForEach(triangle => triangle.Write(writer));
+                writer.Write((UInt32) d.Triangles.Count);
+                d.Triangles.ForEach(triangle => triangle.Write(writer));
             }
         }
     }

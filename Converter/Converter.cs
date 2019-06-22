@@ -1,23 +1,73 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using Converter.Documents;
 
 namespace Converter
 {
     public static class Converter
     {
-        public static void Main(string[] args)
+        public interface IConversionStrategy<Source, Destination> 
+            where Source : IDocument 
+            where Destination : IDocument
         {
-            var obj = ObjReader.ReadObjFile();
-            var triangles = Triangulate(obj);
-            STLWriter.WriteBinary(triangles, File.Open("obj_test.stl", FileMode.Create));
+            IDocumentReader<Source> GetReader();
+            IDocumentWriter<Destination> GetWriter();
+
+            Destination apply(Source source);
         }
 
-        private static List<STLWriter.Triangle> Triangulate(ObjReader.ObjDocument obj)
+        public interface IDocument
         {
-            var result = new List<STLWriter.Triangle>();
+            
+        }
 
-            foreach (var face in obj.faces)
+        public interface IDocumentReader<Source> where Source : IDocument
+        {
+            Source Read(Stream stream);
+        }
+
+        public interface IDocumentWriter<Destination> where Destination : IDocument
+        {
+            void Write(Stream stream, Destination d);
+        }
+
+        public class ObjToStlConversionStrategy : IConversionStrategy<ObjDocument, StlDocument>
+        {
+            public IDocumentReader<ObjDocument> GetReader()
+            {
+                return new ObjReader();
+            }
+
+            public IDocumentWriter<StlDocument> GetWriter()
+            {
+                return new StlWriter();
+            }
+
+            public StlDocument apply(ObjDocument source)
+            {
+                return Triangulate(source);
+            }
+        }
+        
+        public static void Main(string[] args)
+        {
+            var inputPath = "teapot.obj";
+            var outputPath = "obj_test.stl";
+
+            var strategy = new ObjToStlConversionStrategy();
+            var reader = strategy.GetReader();
+            var obj = reader.Read(File.Open(inputPath, FileMode.Open));
+            var stl = strategy.apply(obj);
+            var writer = strategy.GetWriter();
+            writer.Write(File.Open(outputPath, FileMode.Create), stl);
+        }
+
+        private static StlDocument Triangulate(ObjDocument objDocument)
+        {
+            var result = new List<Triangle>();
+            
+            foreach (var face in objDocument.faces)
             {
                 if (IsClockWiseOrder(face))
                 {
@@ -33,11 +83,11 @@ namespace Converter
                 {           
                     //TODO: calculate norm if not provided
                     // Reference numbers start from 1
-                    var v1 = obj.geometricVertices[face.GeometricVertexReferences[0] - 1];
-                    var v2 = obj.geometricVertices[face.GeometricVertexReferences[1] - 1];
-                    var v3 = obj.geometricVertices[face.GeometricVertexReferences[2] - 1];
+                    var v1 = objDocument.geometricVertices[face.GeometricVertexReferences[0] - 1];
+                    var v2 = objDocument.geometricVertices[face.GeometricVertexReferences[1] - 1];
+                    var v3 = objDocument.geometricVertices[face.GeometricVertexReferences[2] - 1];
                     
-                    result.Add(new STLWriter.Triangle(Vector3.Zero, new Vector3[3]
+                    result.Add(new Triangle(Vector3.Zero, new Vector3[3]
                     {
                         new Vector3(v1.X, v1.Y, v1.Z), 
                         new Vector3(v2.X, v2.Y, v2.Z), 
@@ -46,7 +96,7 @@ namespace Converter
                 }
             }
             
-            return result;
+            return new StlDocument(result);
         }
 
         private static void EarClip(ObjReader.Face face)

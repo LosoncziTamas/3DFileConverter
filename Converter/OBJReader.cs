@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using Converter.Documents;
 
 namespace Converter
 {
-    public class ObjReader
+    public class ObjReader : Converter.IDocumentReader<ObjDocument>
     {
         private const string TestObjFile =
               @"#	                Vertices: 8
@@ -43,80 +44,69 @@ namespace Converter
         
         //TestObjFile.Split('\n');
 
-        public class ObjDocument
-        {
-            public List<Vector4> geometricVertices;
-            public List<Vector3> textureVertices;
-            public List<Vector3> vertexNormals;
-            public List<Face> faces;
 
-            public ObjDocument(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals, List<Face> faces)
-            {
-                this.geometricVertices = geometricVertices;
-                this.textureVertices = textureVertices;
-                this.vertexNormals = vertexNormals;
-                this.faces = faces;
-            }
-        }
 
-        public static ObjDocument ReadObjFile()
+        public static ObjDocument ReadObjFile(Stream stream)
         {
-            var lines = File.ReadAllLines("teapot.obj"); 
+            // TODO: add 'global' face pattern variable
 
             var geometricVertices = new List<Vector4>();
             var textureVertices = new List<Vector3>();
             var vertexNormals = new List<Vector3>();
             var faces = new List<Face>();
-            
-            // TODO: add 'global' face pattern variable
 
-            foreach (var line in lines)
+            using (var reader = new StreamReader(stream))
             {
-                var trimmedLine = line.Trim();
-                if (string.IsNullOrEmpty(trimmedLine))
+                while (reader.Peek() > -1)
                 {
-                    continue;
-                }
+                    var line = reader.ReadLine();
 
-                var firstChar = trimmedLine[0];
-                if (firstChar == '#')
-                {
-                    continue;
-                }
-
-                // Other whitespaces as separators?
-                var wordEnd = trimmedLine.IndexOf(' ');
-                if (wordEnd > -1)
-                {
-                    var firstWord = trimmedLine.Substring(0, wordEnd);
-                    var remainderLen = trimmedLine.Length - firstWord.Length;
-                    var remainder = trimmedLine.Substring(wordEnd, remainderLen).Trim();
-                    switch (firstWord)
+                    var trimmedLine = line.Trim();
+                    if (string.IsNullOrEmpty(trimmedLine))
                     {
-                        case "v":
-                            var vertex = ParseGeometricVertex(remainder);
-                            geometricVertices.Add(vertex);
-                            break;
-                        case "f":
-                            var face = Face.Parse(remainder);
-                            faces.Add(face);
-                            break;
-                        case "vt":
-                            var textureVertex = ParseTextureVertex(remainder);
-                            textureVertices.Add(textureVertex);
-                            break;
-                        case "vn":
-                            var vertexNormal = ParseVertexNormal(remainder);
-                            vertexNormals.Add(vertexNormal);
-                            break;
-                        default:
-                            Console.WriteLine("{0} ignored", trimmedLine);
-                            break;
+                        continue;
                     }
-                }
-                else
-                {
-                    Debug.Fail("Invalid obj format");
+
+                    var firstChar = trimmedLine[0];
+                    if (firstChar == '#')
+                    {
+                        continue;
+                    }
+
+                    // Other whitespaces as separators?
+                    var wordEnd = trimmedLine.IndexOf(' ');
+                    if (wordEnd > -1)
+                    {
+                        var firstWord = trimmedLine.Substring(0, wordEnd);
+                        var remainderLen = trimmedLine.Length - firstWord.Length;
+                        var remainder = trimmedLine.Substring(wordEnd, remainderLen).Trim();
+                        switch (firstWord)
+                        {
+                            case "v":
+                                var vertex = ParseGeometricVertex(remainder);
+                                geometricVertices.Add(vertex);
+                                break;
+                            case "f":
+                                var face = Face.Parse(remainder);
+                                faces.Add(face);
+                                break;
+                            case "vt":
+                                var textureVertex = ParseTextureVertex(remainder);
+                                textureVertices.Add(textureVertex);
+                                break;
+                            case "vn":
+                                var vertexNormal = ParseVertexNormal(remainder);
+                                vertexNormals.Add(vertexNormal);
+                                break;
+                            default:
+                                Console.WriteLine("{0} ignored", trimmedLine);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Debug.Fail("Invalid obj format");
+                    }
                 }
             }
 
@@ -249,6 +239,11 @@ namespace Converter
 
                 return usedPattern;
             }
+        }
+
+        public ObjDocument Read(Stream stream)
+        {
+            return ReadObjFile(stream);
         }
     }
 }

@@ -40,10 +40,12 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Converter.cs" />
+        <Compile Include="Documents\ObjDocument.cs" />
+        <Compile Include="Documents\StlDocument.cs" />
         <Compile Include="Extensions.cs" />
         <Compile Include="ObjReader.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="STLWriter.cs" />
+        <Compile Include="StlWriter.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
