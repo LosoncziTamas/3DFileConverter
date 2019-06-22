@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Converter
@@ -38,9 +39,21 @@ namespace Converter
                 
                 # End of file";
 
-        public static void ReadOBJFile()
+        public class OBJDocument
         {
-            var lines = TestObjFile.Split('\n');
+            public List<GeometricVertex> vertices;
+            public List<Face> faces;
+
+            public OBJDocument(List<GeometricVertex> vertices, List<Face> faces)
+            {
+                this.vertices = vertices;
+                this.faces = faces;
+            }
+        }
+
+        public static OBJDocument ReadOBJFile()
+        {
+            var lines = File.ReadAllLines("teapot.obj"); //TestObjFile.Split('\n');
 
             var geometricVertices = new List<GeometricVertex>();
             var faces = new List<Face>();
@@ -93,15 +106,15 @@ namespace Converter
                 }
             }
 
-            Console.WriteLine("{0}{1}", geometricVertices, faces);
+            return new OBJDocument(geometricVertices, faces);
         }
 
 
-        struct GeometricVertex
+        public struct GeometricVertex
         {
-            private float x;
-            private float y;
-            private float z;
+            public float x;
+            public float y;
+            public float z;
 
             private float w;
             // TODO: reference number?
@@ -138,7 +151,7 @@ namespace Converter
             }
         }
 
-        struct TextureVertex
+        public struct TextureVertex
         {
             private float u;
             private float v;
@@ -152,7 +165,7 @@ namespace Converter
             }
         }
 
-        struct VertexNormal
+        public struct VertexNormal
         {
             private float i;
             private float j;
@@ -166,14 +179,14 @@ namespace Converter
             }
         }
 
-        struct Face
+        public struct Face
         {
-            private const string NumberPattern = @"\d$";
+            private const string NumberPattern = @"\d+$";
             private static readonly Regex OnlyVertices = new Regex($"^{NumberPattern}");
 
-            private List<int> geometricVertexReferences;
-            private List<int> textureVertexReferences;
-            private List<int> normalVertexReferences;
+            public List<int> geometricVertexReferences;
+            public List<int> textureVertexReferences;
+            public List<int> normalVertexReferences;
 
             public static Face Parse(string str)
             {

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Numerics;
 
 namespace Converter
 {
@@ -9,175 +8,62 @@ namespace Converter
     {
         public static void Main(string[] args)
         {
-            WriteSTLFile();
+            var obj = OBJReader.ReadOBJFile();
+            var triangles = Triangulate(obj);
+            STLWriter.WriteBinary(triangles, File.Open("obj_test.stl", FileMode.Create));
         }
 
-        struct Vector3
+        private static List<STLWriter.Triangle> Triangulate(OBJReader.OBJDocument obj)
         {
-            private float x;
-            private float y;
-            private float z;
+            var result = new List<STLWriter.Triangle>();
 
-            public Vector3(float x, float y, float z)
+            foreach (var face in obj.faces)
             {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-
-            public void Write(BinaryWriter writer)
-            {
-                writer.Write(x);
-                writer.Write(y);
-                writer.Write(z);
-            }
-        }
-
-        struct Triangle
-        {
-            private Vector3[] vertices;
-            private Vector3 norm;
-            private UInt16 attributeByteCount;
-
-            public Triangle(Vector3 norm, Vector3[] vertices)
-            {
-                this.vertices = vertices;
-                this.norm = norm;
-                attributeByteCount = 0;
-            }
-            
-            public void Write(BinaryWriter writer)
-            {
-                norm.Write(writer);
-                for (var i = 0; i < 3; ++i)
+                if (IsClockWiseOrder(face))
                 {
-                    vertices[i].Write(writer);
+                    ReverseVertexOrder(face);
                 }
-                writer.Write(attributeByteCount);
-            }
-        }
 
-        private static void WriteSTLFile()
-        {
-            var box = new List<Triangle>
-            {
-                new Triangle(
-                    new Vector3(-0.904534f, 0.301511f, -0.301511f),
-                    new Vector3[3]
+                if (face.geometricVertexReferences.Count > 3)
+                {
+                    EarClip(face);
+                    // TODO
+                }
+                else
+                {           
+                    //TODO: calculate norm if not provided
+                    // Reference numbers start from 1
+                    var v1 = obj.vertices[face.geometricVertexReferences[0] - 1];
+                    var v2 = obj.vertices[face.geometricVertexReferences[1] - 1];
+                    var v3 = obj.vertices[face.geometricVertexReferences[2] - 1];
+                    
+                    result.Add(new STLWriter.Triangle(Vector3.Zero, new Vector3[3]
                     {
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.904534f, -0.301511f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(0.301511f, -0.904534f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, 0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.301511f, -0.904534f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3( 0.5f, -0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),                
-                new Triangle(
-                    new Vector3(0.301511f, 0.301511f, -0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3( 0.5f, 0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.301511f, -0.301511f, -0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3( 0.5f, -0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(0.301511f, 0.904534f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(-0.301511f, 0.904534f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.301511f, 0.301511f, 0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, 0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(-0.301511f, -0.301511f, 0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.904534f, 0.301511f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.904534f, -0.301511f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(0.5f, -0.5f, 0.5f)
-                    }
-                )
-            };
+                        new Vector3(v1.x, v1.y, v1.z), 
+                        new Vector3(v2.x, v2.y, v2.z), 
+                        new Vector3(v3.x, v3.y, v3.z) 
+                    }));
+                }
+            }
             
-            WriteBinary(box, File.Open("box.stl", FileMode.Create));
+            return result;
         }
 
-        private static void WriteBinary(List<Triangle> triangles, Stream stream)
+        private static void EarClip(OBJReader.Face face)
         {
-            using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
-            {
-                var header = new byte[80];
-                writer.Write(header);
-                writer.Write((UInt32) triangles.Count);
-                triangles.ForEach(triangle => triangle.Write(writer));
-            }
+            
+        }
+
+        private static bool IsClockWiseOrder(OBJReader.Face face)
+        {
+            return false;
+        }
+
+        private static void ReverseVertexOrder(OBJReader.Face face)
+        {
+            face.geometricVertexReferences.Reverse();
+            face.normalVertexReferences.Reverse();
+            face.textureVertexReferences.Reverse();
         }
     }
 }

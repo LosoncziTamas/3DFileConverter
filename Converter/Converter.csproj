@@ -35,12 +35,15 @@
         <Reference Include="System" />
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
+        <Reference Include="System.Numerics" />
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Converter.cs" />
+        <Compile Include="Extensions.cs" />
         <Compile Include="OBJReader.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="STLWriter.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
