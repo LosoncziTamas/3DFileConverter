@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Converter
 {
-    public class OBJReader
+    public class ObjReader
     {
         private const string TestObjFile =
               @"#	                Vertices: 8
@@ -38,25 +40,34 @@ namespace Converter
                         f 6 7 8 5
                 
                 # End of file";
+        
+        //TestObjFile.Split('\n');
 
-        public class OBJDocument
+        public class ObjDocument
         {
-            public List<GeometricVertex> vertices;
+            public List<Vector4> geometricVertices;
+            public List<Vector3> textureVertices;
+            public List<Vector3> vertexNormals;
             public List<Face> faces;
 
-            public OBJDocument(List<GeometricVertex> vertices, List<Face> faces)
+            public ObjDocument(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals, List<Face> faces)
             {
-                this.vertices = vertices;
+                this.geometricVertices = geometricVertices;
+                this.textureVertices = textureVertices;
+                this.vertexNormals = vertexNormals;
                 this.faces = faces;
             }
         }
 
-        public static OBJDocument ReadOBJFile()
+        public static ObjDocument ReadObjFile()
         {
-            var lines = File.ReadAllLines("teapot.obj"); //TestObjFile.Split('\n');
+            var lines = File.ReadAllLines("teapot.obj"); 
 
-            var geometricVertices = new List<GeometricVertex>();
+            var geometricVertices = new List<Vector4>();
+            var textureVertices = new List<Vector3>();
+            var vertexNormals = new List<Vector3>();
             var faces = new List<Face>();
+            
             // TODO: add 'global' face pattern variable
 
             foreach (var line in lines)
@@ -83,7 +94,7 @@ namespace Converter
                     switch (firstWord)
                     {
                         case "v":
-                            var vertex = GeometricVertex.Parse(remainder);
+                            var vertex = ParseGeometricVertex(remainder);
                             geometricVertices.Add(vertex);
                             break;
                         case "f":
@@ -91,8 +102,12 @@ namespace Converter
                             faces.Add(face);
                             break;
                         case "vt":
+                            var textureVertex = ParseTextureVertex(remainder);
+                            textureVertices.Add(textureVertex);
+                            break;
                         case "vn":
-                            Console.WriteLine("{0} processed", trimmedLine);
+                            var vertexNormal = ParseVertexNormal(remainder);
+                            vertexNormals.Add(vertexNormal);
                             break;
                         default:
                             Console.WriteLine("{0} ignored", trimmedLine);
@@ -101,123 +116,112 @@ namespace Converter
                 }
                 else
                 {
-                    Console.WriteLine("Invalid obj format");
-                    //TODO: throw
+                    Debug.Fail("Invalid obj format");
                 }
             }
 
-            return new OBJDocument(geometricVertices, faces);
+            return new ObjDocument(
+                geometricVertices,
+                textureVertices,
+                vertexNormals,
+                faces);
         }
 
-
-        public struct GeometricVertex
+        private static Vector3 ParseVertexNormal(string str)
         {
-            public float x;
-            public float y;
-            public float z;
-
-            private float w;
-            // TODO: reference number?
-
-            public GeometricVertex(float x, float y, float z, float w)
+            var vertices = str.Split(' ');
+            Debug.Assert(vertices.Length == 3, "Invalid vertex normal count");
+            
+            if (float.TryParse(vertices[0], out var x) &&
+                float.TryParse(vertices[1], out var y) &&
+                float.TryParse(vertices[2], out var z))
             {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-                this.w = w;
+                return new Vector3(x, y, z);
             }
 
-            public static GeometricVertex Parse(string str)
+            Debug.Fail("Invalid vertex format");
+            return Vector3.Zero;            
+        }
+
+        private static Vector3 ParseTextureVertex(string str)
+        {
+            var vertices = str.Split(' ');
+            Debug.Assert(vertices.Length >= 2, "Invalid vertex count");
+
+            if (float.TryParse(vertices[0], out var x)&&
+                float.TryParse(vertices[1], out var y))
             {
-                var vertices = str.Split(' ');
-                if (vertices.Length < 3)
+                var result = new Vector3(x, y, 1.0f);
+                if (vertices.Length == 3 && float.TryParse(vertices[2], out var z))
                 {
-                    Console.WriteLine("Invalid vertex count");
-                    //TODO: throw
-                    return new GeometricVertex(0, 0, 0, 0);
+                    result.Z = z;
                 }
 
-                //TODO: check number format
-                var x = float.Parse(vertices[0]);
-                var y = float.Parse(vertices[1]);
-                var z = float.Parse(vertices[2]);
-                var w = vertices.Length == 4 ? float.Parse(vertices[3]) : 1.0f;
-                return new GeometricVertex(x, y, z, w);
+                return result;
             }
-
-            public override string ToString()
-            {
-                return $"{nameof(x)}: {x}, {nameof(y)}: {y}, {nameof(z)}: {z}, {nameof(w)}: {w}";
-            }
+            
+            Debug.Fail("Invalid vertex format");
+            return Vector3.Zero;  
         }
 
-        public struct TextureVertex
+        private static Vector4 ParseGeometricVertex(string str)
         {
-            private float u;
-            private float v;
-            private float w;
+            var vertices = str.Split(' ');
+            Debug.Assert(vertices.Length >= 3, "Invalid vertex count");
 
-            public TextureVertex(float u, float v = 1.0f, float w = 1.0f)
+            if (float.TryParse(vertices[0], out var x) &&
+                float.TryParse(vertices[1], out var y) &&
+                float.TryParse(vertices[2], out var z))
             {
-                this.u = u;
-                this.v = v;
-                this.w = w;
+                var result = new Vector4(x, y, z, 1.0f);
+                if (vertices.Length == 4 && float.TryParse(vertices[3], out var w))
+                {
+                    result.W = w;
+                }
+
+                return result;
             }
+            
+            Debug.Fail("Invalid vertex format");
+            return Vector4.Zero;  
         }
 
-        public struct VertexNormal
-        {
-            private float i;
-            private float j;
-            private float k;
-
-            public VertexNormal(float i, float j, float k)
-            {
-                this.i = i;
-                this.j = j;
-                this.k = k;
-            }
-        }
-
-        public struct Face
+        public class Face
         {
             private const string NumberPattern = @"\d+$";
             private static readonly Regex OnlyVertices = new Regex($"^{NumberPattern}");
 
-            public List<int> geometricVertexReferences;
-            public List<int> textureVertexReferences;
-            public List<int> normalVertexReferences;
+            public readonly List<int> GeometricVertexReferences;
+            public readonly List<int> TextureVertexReferences;
+            public readonly List<int> NormalVertexReferences;
+
+            public Face()
+            {
+                GeometricVertexReferences = new List<int>();
+                TextureVertexReferences = new List<int>();
+                NormalVertexReferences = new List<int>();
+            }
 
             public static Face Parse(string str)
             {
                 var usedPattern = DetermineMatchingPattern(str);
                 var faceElementsPerLine = str.Split(' ');
+                var face = new Face();
 
-                var face = new Face
-                {
-                    geometricVertexReferences = new List<int>(),
-                    textureVertexReferences = new List<int>(),
-                    normalVertexReferences = new List<int>()
-                };
-
-                //1//1 in 1//1 2//2 3//3 4//4
                 foreach (var faceStr in faceElementsPerLine)
                 {
                     if (usedPattern != null && usedPattern.IsMatch(faceStr))
                     {
-                        //1
                         if (usedPattern == OnlyVertices)
                         {
                             var vertex = int.Parse(faceStr);
-                            face.geometricVertexReferences.Add(vertex);
+                            face.GeometricVertexReferences.Add(vertex);
                         }
-
                         // TODO: add other layouts
                     }
                     else
                     {
-                        return new Face();
-                        //TODO: throw   
+                       Debug.Fail("No matching pattern for face element layout");
                     }
                 }
 

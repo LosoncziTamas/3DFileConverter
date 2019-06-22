@@ -4,16 +4,16 @@ using System.Numerics;
 
 namespace Converter
 {
-    internal class Converter
+    public static class Converter
     {
         public static void Main(string[] args)
         {
-            var obj = OBJReader.ReadOBJFile();
+            var obj = ObjReader.ReadObjFile();
             var triangles = Triangulate(obj);
             STLWriter.WriteBinary(triangles, File.Open("obj_test.stl", FileMode.Create));
         }
 
-        private static List<STLWriter.Triangle> Triangulate(OBJReader.OBJDocument obj)
+        private static List<STLWriter.Triangle> Triangulate(ObjReader.ObjDocument obj)
         {
             var result = new List<STLWriter.Triangle>();
 
@@ -24,7 +24,7 @@ namespace Converter
                     ReverseVertexOrder(face);
                 }
 
-                if (face.geometricVertexReferences.Count > 3)
+                if (face.GeometricVertexReferences.Count > 3)
                 {
                     EarClip(face);
                     // TODO
@@ -33,15 +33,15 @@ namespace Converter
                 {           
                     //TODO: calculate norm if not provided
                     // Reference numbers start from 1
-                    var v1 = obj.vertices[face.geometricVertexReferences[0] - 1];
-                    var v2 = obj.vertices[face.geometricVertexReferences[1] - 1];
-                    var v3 = obj.vertices[face.geometricVertexReferences[2] - 1];
+                    var v1 = obj.geometricVertices[face.GeometricVertexReferences[0] - 1];
+                    var v2 = obj.geometricVertices[face.GeometricVertexReferences[1] - 1];
+                    var v3 = obj.geometricVertices[face.GeometricVertexReferences[2] - 1];
                     
                     result.Add(new STLWriter.Triangle(Vector3.Zero, new Vector3[3]
                     {
-                        new Vector3(v1.x, v1.y, v1.z), 
-                        new Vector3(v2.x, v2.y, v2.z), 
-                        new Vector3(v3.x, v3.y, v3.z) 
+                        new Vector3(v1.X, v1.Y, v1.Z), 
+                        new Vector3(v2.X, v2.Y, v2.Z), 
+                        new Vector3(v3.X, v3.Y, v3.Z) 
                     }));
                 }
             }
@@ -49,21 +49,21 @@ namespace Converter
             return result;
         }
 
-        private static void EarClip(OBJReader.Face face)
+        private static void EarClip(ObjReader.Face face)
         {
             
         }
 
-        private static bool IsClockWiseOrder(OBJReader.Face face)
+        private static bool IsClockWiseOrder(ObjReader.Face face)
         {
             return false;
         }
 
-        private static void ReverseVertexOrder(OBJReader.Face face)
+        private static void ReverseVertexOrder(ObjReader.Face face)
         {
-            face.geometricVertexReferences.Reverse();
-            face.normalVertexReferences.Reverse();
-            face.textureVertexReferences.Reverse();
+            face.GeometricVertexReferences.Reverse();
+            face.NormalVertexReferences.Reverse();
+            face.TextureVertexReferences.Reverse();
         }
     }
 }
