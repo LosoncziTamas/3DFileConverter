@@ -1,9 +1,10 @@
 ﻿using System.IO;
+using Converter.Conversion;
 
 namespace Converter
 {
     public static class ConverterEntry
-    {
+    {   
         public static void Main(string[] args)
         {
             var inputPath = "mini.obj";

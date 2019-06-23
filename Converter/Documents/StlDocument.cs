@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -9,7 +8,6 @@ namespace Converter.Documents
     public class StlDocument : IDocument
     {
         public readonly List<Triangle> Triangles;
-
         public StlDocument(List<Triangle> triangles)
         {
             Triangles = triangles;
@@ -20,7 +18,7 @@ namespace Converter.Documents
     {
         private Vector3[] vertices;
         private Vector3 norm;
-        private UInt16 attributeByteCount;
+        private ushort attributeByteCount;
 
         public Triangle(Vector3 norm, Vector3[] vertices)
         {

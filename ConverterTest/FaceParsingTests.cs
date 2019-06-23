@@ -1,23 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Converter;
+using Converter.Conversion;
+using Converter.Documents;
 using NUnit.Framework;
 
 namespace ConverterTest
 {
     [TestFixture]
-    public class Tests
+    public class FaceParsingTests
     {
         [Test]
         public void TestFaceParse1()
         {
             // given
-            var expected = new ObjReader.Face();
+            var expected = new Face();
             expected.GeometricVertexReferences.AddRange(new List<int>{3, 4, 25, 26});
             var onlyVertexLayout = "3 4 25 26";
             
             // when
-            var result = ObjReader.Face.Parse(onlyVertexLayout);
+            var result = ObjReader.ParseFace(onlyVertexLayout);
             
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -27,13 +29,13 @@ namespace ConverterTest
         public void TestFaceParse2()
         {
             // given
-            var expected = new ObjReader.Face();
+            var expected = new Face();
             expected.GeometricVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             var vertexAndNormalLayout = "1//1 2//2 3//3 4//4";
             
             // when
-            var result = ObjReader.Face.Parse(vertexAndNormalLayout);
+            var result = ObjReader.ParseFace(vertexAndNormalLayout);
             
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -44,14 +46,14 @@ namespace ConverterTest
         public void TestFaceParse3()
         {
             // given
-            var expected = new ObjReader.Face();
+            var expected = new Face();
             expected.GeometricVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             var completeLayout = "1/1/1 2/2/2 3/3/3 4/4/4";
             
             // when
-            var result = ObjReader.Face.Parse(completeLayout);
+            var result = ObjReader.ParseFace(completeLayout);
             
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -63,13 +65,13 @@ namespace ConverterTest
         public void TestFaceParse4()
         {
             // given
-            var expected = new ObjReader.Face();
+            var expected = new Face();
             expected.GeometricVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int>{1, 2, 3, 4});
             var vertexAndTextureLayout = "1/1 2/2 3/3 4/4";
             
             // when
-            var result = ObjReader.Face.Parse(vertexAndTextureLayout);
+            var result = ObjReader.ParseFace(vertexAndTextureLayout);
             
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));

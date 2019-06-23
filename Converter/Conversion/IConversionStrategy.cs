@@ -1,7 +1,7 @@
 using System.IO;
 using Converter.Documents;
 
-namespace Converter
+namespace Converter.Conversion
 {
     public interface IConversionStrategy<Source, Destination> 
         where Source : IDocument 
