@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Converter", "Converter\Converter.csproj", "{E198D913-4E28-4501-AD7E-6BBD598CCC4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConverterTest", "ConverterTest\ConverterTest.csproj", "{6B7665E2-6B3C-47C9-B6D4-56B7551A8535}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{E198D913-4E28-4501-AD7E-6BBD598CCC4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E198D913-4E28-4501-AD7E-6BBD598CCC4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E198D913-4E28-4501-AD7E-6BBD598CCC4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B7665E2-6B3C-47C9-B6D4-56B7551A8535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B7665E2-6B3C-47C9-B6D4-56B7551A8535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B7665E2-6B3C-47C9-B6D4-56B7551A8535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B7665E2-6B3C-47C9-B6D4-56B7551A8535}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

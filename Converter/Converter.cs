@@ -52,7 +52,7 @@ namespace Converter
         
         public static void Main(string[] args)
         {
-            var inputPath = "airboat.obj";
+            var inputPath = "mini.obj";
             var outputPath = "obj_test.stl";
 
             var strategy = new ObjToStlConversionStrategy();

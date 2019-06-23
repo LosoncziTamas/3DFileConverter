@@ -9,7 +9,6 @@ namespace Converter
 {
     public class StlWriter : Converter.IDocumentWriter<StlDocument>
     {
-
         private static void DummyNormalization()
         {
             var v1 = new Vector3(-0.5f, 0.5f, 0.5f);
@@ -21,118 +20,6 @@ namespace Converter
 
             var norm = Vector3.Cross(u, v);
             norm = Vector3.Normalize(norm);
-        }
-        
-        private static void WriteDummySTLFile()
-        {
-            var box = new List<Triangle>
-            {
-                new Triangle(
-                    new Vector3(-0.904534f, 0.301511f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.904534f, -0.301511f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(0.301511f, -0.904534f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, 0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.301511f, -0.904534f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, -0.5f, -0.5f), 
-                        new Vector3( 0.5f, -0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),                
-                new Triangle(
-                    new Vector3(0.301511f, 0.301511f, -0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3( 0.5f, 0.5f, -0.5f), 
-                        new Vector3(0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(-0.301511f, -0.301511f, -0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3( 0.5f, -0.5f, -0.5f), 
-                        new Vector3(-0.5f, -0.5f, -0.5f)
-                    }
-                ),
-                new Triangle(
-                    new Vector3(0.301511f, 0.904534f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(-0.301511f, 0.904534f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, -0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.301511f, 0.301511f, 0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, 0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(-0.301511f, -0.301511f, 0.904534f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, 0.5f), 
-                        new Vector3(-0.5f, 0.5f, 0.5f), 
-                        new Vector3(-0.5f, -0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.904534f, 0.301511f, -0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f)
-                    }
-                ),new Triangle(
-                    new Vector3(0.904534f, -0.301511f, 0.301511f),
-                    new Vector3[3]
-                    {
-                        new Vector3(0.5f, -0.5f, -0.5f), 
-                        new Vector3(0.5f, 0.5f, 0.5f), 
-                        new Vector3(0.5f, -0.5f, 0.5f)
-                    }
-                )
-            };
-            
-            // Write(File.Open("box.stl", FileMode.Create), new StlDocument(box));
         }
 
         public void Write(Stream stream, StlDocument d)

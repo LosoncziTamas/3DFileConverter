@@ -12,8 +12,6 @@ namespace Converter
     {
         public static ObjDocument ReadObjFile(Stream stream)
         {
-            // TODO: add 'global' face pattern variable
-
             var geometricVertices = new List<Vector4>();
             var textureVertices = new List<Vector3>();
             var vertexNormals = new List<Vector3>();
@@ -23,9 +21,7 @@ namespace Converter
             {
                 while (reader.Peek() > -1)
                 {
-                    var line = reader.ReadLine();
-
-                    var trimmedLine = line.Trim();
+                    var trimmedLine = reader.ReadLine()?.Trim();
                     if (string.IsNullOrEmpty(trimmedLine))
                     {
                         continue;
@@ -37,7 +33,6 @@ namespace Converter
                         continue;
                     }
 
-                    // Other whitespaces as separators?
                     var wordEnd = trimmedLine.IndexOf(' ');
                     if (wordEnd > -1)
                     {
@@ -61,9 +56,6 @@ namespace Converter
                             case "vn":
                                 var vertexNormal = ParseVertexNormal(remainder);
                                 vertexNormals.Add(vertexNormal);
-                                break;
-                            default:
-                                Console.WriteLine("{0} ignored", trimmedLine);
                                 break;
                         }
                     }
@@ -142,8 +134,10 @@ namespace Converter
 
         public class Face
         {
-            private const string NumberPattern = @"\d+$";
-            private static readonly Regex OnlyVertices = new Regex($"^{NumberPattern}");
+            private static readonly Regex OnlyVertices = new Regex(@"^\d+$");
+            private static readonly Regex VerticesAndNormals = new Regex(@"^\d+\/\/\d+$");
+            private static readonly Regex VerticesAndTexture = new Regex(@"^\d+\/\d+$");
+            private static readonly Regex Complete = new Regex(@"^\d+\/\d+\/\d+$");
 
             public readonly List<int> GeometricVertexReferences;
             public readonly List<int> TextureVertexReferences;
@@ -158,32 +152,49 @@ namespace Converter
 
             public static Face Parse(string str)
             {
-                var usedPattern = DetermineMatchingPattern(str);
+                var faceLayout = DetermineFaceLayout(str);
                 var faceElementsPerLine = str.Split(' ');
-                var face = new Face();
-
+                var result = new Face();
                 foreach (var faceStr in faceElementsPerLine)
                 {
-                    if (usedPattern != null && usedPattern.IsMatch(faceStr))
+                    if (faceLayout != null && faceLayout.IsMatch(faceStr))
                     {
-                        if (usedPattern == OnlyVertices)
+                        if (faceLayout == OnlyVertices)
                         {
                             var vertex = int.Parse(faceStr);
-                            face.GeometricVertexReferences.Add(vertex);
+                            result.GeometricVertexReferences.Add(vertex);
                         }
-                        // TODO: add other layouts
+                        else if (faceLayout == Complete)
+                        {
+                            var elements = faceStr.Split('/');
+                            result.GeometricVertexReferences.Add(int.Parse(elements[0]));
+                            result.TextureVertexReferences.Add(int.Parse(elements[1]));
+                            result.NormalVertexReferences.Add(int.Parse(elements[2]));
+                        }
+                        else if (faceLayout == VerticesAndNormals)
+                        {
+                            var elements = faceStr.Split('/');
+                            result.GeometricVertexReferences.Add(int.Parse(elements[0]));
+                            result.NormalVertexReferences.Add(int.Parse(elements[2]));
+                        }
+                        else if (faceLayout == VerticesAndTexture)
+                        {
+                            var elements = faceStr.Split('/');
+                            result.GeometricVertexReferences.Add(int.Parse(elements[0]));
+                            result.TextureVertexReferences.Add(int.Parse(elements[1]));
+                        }
                     }
                     else
                     {
-                       Debug.Fail("No matching pattern for face element layout");
+                        throw new FormatException($"Not recognizable .obj face element layout: {faceStr}");
                     }
                 }
 
-                return face;
+                return result;
             }
 
 
-            private static Regex DetermineMatchingPattern(string str)
+            private static Regex DetermineFaceLayout(string str)
             {
                 var firstFaceLen = str.IndexOf(' ');
                 Regex usedPattern = null;
@@ -193,12 +204,23 @@ namespace Converter
                     if (OnlyVertices.IsMatch(firstFace))
                     {
                         usedPattern = OnlyVertices;
+                    } 
+                    else if (Complete.IsMatch(firstFace))
+                    {
+                        usedPattern = Complete;
+                    }
+                    else if (VerticesAndNormals.IsMatch(firstFace))
+                    {
+                        usedPattern = VerticesAndNormals;
+                    }
+                    else if (VerticesAndTexture.IsMatch(firstFace))
+                    {
+                        usedPattern = VerticesAndTexture;
                     }
                 }
                 else
                 {
-                    //TODO throw
-                    Console.WriteLine("{0} invalid face format", str);
+                    throw new FormatException($"Not recognizable .obj face element layout: {str}");
                 }
 
                 return usedPattern;
