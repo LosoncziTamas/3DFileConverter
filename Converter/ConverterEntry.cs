@@ -12,9 +12,9 @@ namespace Converter
     {
         class Conversion
         {
-            public string SrcFormat { get; }
-            public string DstFormat { get; }
-            public IConversionStrategy ConversionStrategy { get; }
+            public readonly string SrcFormat;
+            public readonly string DstFormat;
+            public readonly IConversionStrategy ConversionStrategy;
 
             public Conversion(string srcFormat, string dstFormat, IConversionStrategy conversionStrategy)
             {

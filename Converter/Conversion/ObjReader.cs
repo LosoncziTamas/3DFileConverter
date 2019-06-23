@@ -46,20 +46,16 @@ namespace Converter.Conversion
                         switch (firstWord)
                         {
                             case "v":
-                                var vertex = ParseGeometricVertex(remainder);
-                                geometricVertices.Add(vertex);
+                                geometricVertices.Add(ParseGeometricVertex(remainder));
                                 break;
                             case "f":
-                                var face = ParseFace(remainder);
-                                faces.Add(face);
+                                faces.Add(ParseFace(remainder));
                                 break;
                             case "vt":
-                                var textureVertex = ParseTextureVertex(remainder);
-                                textureVertices.Add(textureVertex);
+                                textureVertices.Add(ParseTextureVertex(remainder));
                                 break;
                             case "vn":
-                                var vertexNormal = ParseVertexNormal(remainder);
-                                vertexNormals.Add(vertexNormal);
+                                vertexNormals.Add(ParseVertexNormal(remainder));
                                 break;
                         }
                     }

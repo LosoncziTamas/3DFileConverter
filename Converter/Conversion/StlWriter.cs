@@ -1,6 +1,5 @@
 using System.IO;
 using System.Numerics;
-using System.Text;
 using Converter.Documents;
 
 namespace Converter.Conversion
@@ -11,13 +10,11 @@ namespace Converter.Conversion
         
         public void WriteToStream(StlDocument stlDocument, Stream stream)
         {
-            // TODO: leave open?
-            using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
+            using (var writer = new BinaryWriter(stream))
             {
                 var header = new byte[HeaderSize];
                 writer.Write(header);
                 writer.Write((uint) stlDocument.Triangles.Count);
-                // TODO perf check
                 stlDocument.Triangles.ForEach(triangle => WriteTriangle(triangle, writer));
             }
         }
