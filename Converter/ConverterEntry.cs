@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CommandLine;
@@ -9,13 +10,13 @@ namespace Converter
 {
     public static class ConverterEntry
     {
-        class ConversionType
+        class Conversion
         {
             public string SrcFormat { get; }
             public string DstFormat { get; }
             public IConversionStrategy ConversionStrategy { get; }
 
-            public ConversionType(string srcFormat, string dstFormat, IConversionStrategy conversionStrategy)
+            public Conversion(string srcFormat, string dstFormat, IConversionStrategy conversionStrategy)
             {
                 SrcFormat = srcFormat;
                 DstFormat = dstFormat;
@@ -45,9 +46,9 @@ namespace Converter
             public string DestinationFormat { get; set; }
         }
 
-        private static readonly List<ConversionType> SupportedConversions = new List<ConversionType>
+        private static readonly List<Conversion> SupportedConversions = new List<Conversion>
         {
-            new ConversionType(".obj", ".stl", new ObjToStlConversionStrategy()),
+            new Conversion(".obj", ".stl", new ObjToStlConversionStrategy()),
         };
 
         public static void Main(string[] args)
@@ -57,6 +58,8 @@ namespace Converter
 
         private static void ProcessOptions(CommandLineOptions opts)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
             var defaultSupportedConversion = SupportedConversions.First();
             opts.SourceFormat = string.IsNullOrEmpty(opts.SourceFormat) ? defaultSupportedConversion.SrcFormat : opts.SourceFormat;
             opts.DestinationFormat = string.IsNullOrEmpty(opts.DestinationFormat) ? defaultSupportedConversion.DstFormat : opts.DestinationFormat;
@@ -71,7 +74,15 @@ namespace Converter
                     Console.WriteLine("Provided input file does not exist.");
                     return;
                 }
-                conversionType.ConversionStrategy.ApplyConversion(File.Open(inputPath, FileMode.Open),File.Open(outputPath, FileMode.Create));
+
+                try
+                {
+                    conversionType.ConversionStrategy.ApplyConversion(File.Open(inputPath, FileMode.Open),File.Open(outputPath, FileMode.Create));
+                }
+                catch (FormatException e)
+                {
+                    Console.WriteLine(e);
+                }
             }
             else
             {
@@ -81,6 +92,9 @@ namespace Converter
                     Console.WriteLine("{0} to {1}", conversion.SrcFormat, conversion.DstFormat);
                 }
             }
+            
+            stopwatch.Stop();
+            Console.WriteLine("Total elapsed time {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
     }
 }

@@ -1,5 +1,4 @@
 using System.IO;
-using Converter.Documents;
 
 namespace Converter.Conversion
 {

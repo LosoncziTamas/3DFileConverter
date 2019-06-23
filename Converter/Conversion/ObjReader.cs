@@ -63,10 +63,6 @@ namespace Converter.Conversion
                                 break;
                         }
                     }
-                    else
-                    {
-                        Debug.Print("Unexpected line {0}", trimmedLine);
-                    }
                 }
             }
 
@@ -80,7 +76,10 @@ namespace Converter.Conversion
         private Vector3 ParseVertexNormal(string str)
         {
             var vertices = str.Split(' ');
-            Debug.Assert(vertices.Length == 3, "Invalid vertex normal count");
+            if (vertices.Length != 3)
+            {
+                throw new FormatException($"Unexpected vertex normal count {vertices.Length}");
+            }
 
             if (float.TryParse(vertices[0], out var x) &&
                 float.TryParse(vertices[1], out var y) &&
@@ -89,14 +88,16 @@ namespace Converter.Conversion
                 return new Vector3(x, y, z);
             }
 
-            Debug.Fail("Invalid vertex format");
-            return Vector3.Zero;
+            throw new FormatException("Vertex normal parsing failed.");
         }
 
         private Vector3 ParseTextureVertex(string str)
         {
             var vertices = str.Split(' ');
-            Debug.Assert(vertices.Length >= 2, "Invalid vertex count");
+            if (vertices.Length < 2)
+            {
+                throw new FormatException($"Unexpected texture vertex count {vertices.Length}");
+            }
 
             if (float.TryParse(vertices[0], out var x) &&
                 float.TryParse(vertices[1], out var y))
@@ -109,15 +110,16 @@ namespace Converter.Conversion
 
                 return result;
             }
-
-            Debug.Fail("Invalid vertex format");
-            return Vector3.Zero;
+            throw new FormatException("Texture Vertex parsing failed.");
         }
 
         private Vector4 ParseGeometricVertex(string str)
         {
             var vertices = str.Split(' ');
-            Debug.Assert(vertices.Length >= 3, "Invalid vertex count");
+            if (vertices.Length != 3)
+            {
+                throw new FormatException($"Unexpected vertex count {vertices.Length}");
+            }
 
             if (float.TryParse(vertices[0], out var x) &&
                 float.TryParse(vertices[1], out var y) &&
@@ -131,9 +133,7 @@ namespace Converter.Conversion
 
                 return result;
             }
-
-            Debug.Fail("Invalid vertex format");
-            return Vector4.Zero;
+            throw new FormatException("Vertex parsing failed.");
         }
 
         public static Face ParseFace(string str)
@@ -207,7 +207,6 @@ namespace Converter.Conversion
             {
                 throw new FormatException($"Not recognizable .obj face element layout: {str}");
             }
-
             return usedPattern;
         }
     }

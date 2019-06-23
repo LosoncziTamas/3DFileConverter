@@ -2,7 +2,6 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using Converter.Documents;
-using Converter.Utils;
 
 namespace Converter.Conversion
 {
