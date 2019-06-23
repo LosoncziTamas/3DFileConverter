@@ -1,69 +1,35 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Text;
 using Converter.Documents;
 
 namespace Converter
 {
-    public static class Converter
+    public class ObjToStlConversionStrategy : IConversionStrategy<ObjDocument, StlDocument>
     {
-        public interface IConversionStrategy<Source, Destination> 
-            where Source : IDocument 
-            where Destination : IDocument
+        public ObjDocument ReadFromStream(Stream stream)
         {
-            IDocumentReader<Source> GetReader();
-            IDocumentWriter<Destination> GetWriter();
-
-            Destination apply(Source source);
+            return ObjReader.ReadObjFile(stream);
         }
 
-        public interface IDocument
+        public void WriteToStream(StlDocument d, Stream stream)
         {
-            
-        }
-
-        public interface IDocumentReader<Source> where Source : IDocument
-        {
-            Source Read(Stream stream);
-        }
-
-        public interface IDocumentWriter<Destination> where Destination : IDocument
-        {
-            void Write(Stream stream, Destination d);
-        }
-
-        public class ObjToStlConversionStrategy : IConversionStrategy<ObjDocument, StlDocument>
-        {
-            public IDocumentReader<ObjDocument> GetReader()
+            using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
             {
-                return new ObjReader();
+                var header = new byte[80];
+                writer.Write(header);
+                writer.Write((uint) d.Triangles.Count);
+                d.Triangles.ForEach(triangle => triangle.Write(writer));
             }
+        }
 
-            public IDocumentWriter<StlDocument> GetWriter()
-            {
-                return new StlWriter();
-            }
-
-            public StlDocument apply(ObjDocument source)
-            {
-                return Triangulate(source);
-            }
+        public StlDocument ApplyConversion(ObjDocument source)
+        {
+            return Triangulate(source);
         }
         
-        public static void Main(string[] args)
-        {
-            var inputPath = "mini.obj";
-            var outputPath = "obj_test.stl";
-
-            var strategy = new ObjToStlConversionStrategy();
-            var reader = strategy.GetReader();
-            var obj = reader.Read(File.Open(inputPath, FileMode.Open));
-            var stl = strategy.apply(obj);
-            var writer = strategy.GetWriter();
-            writer.Write(File.Open(outputPath, FileMode.Create), stl);
-        }
-
-        private static StlDocument Triangulate(ObjDocument objDocument)
+         private static StlDocument Triangulate(ObjDocument objDocument)
         {
             var result = new List<Triangle>();
             
@@ -139,4 +105,6 @@ namespace Converter
             face.TextureVertexReferences.Reverse();
         }
     }
+    
+    
 }

@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using Converter.Utils;
 
 namespace Converter.Documents
 {
-    public class StlDocument : Converter.IDocument
+    public class StlDocument : IDocument
     {
         public readonly List<Triangle> Triangles;
 

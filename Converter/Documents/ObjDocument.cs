@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Converter.Documents
 {
-    public class ObjDocument : Converter.IDocument
+    public class ObjDocument : IDocument
     {
         public List<Vector4> geometricVertices;
         public List<Vector3> textureVertices;

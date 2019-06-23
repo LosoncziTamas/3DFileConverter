@@ -8,7 +8,7 @@ using Converter.Documents;
 
 namespace Converter
 {
-    public class ObjReader : Converter.IDocumentReader<ObjDocument>
+    public class ObjReader
     {
         public static ObjDocument ReadObjFile(Stream stream)
         {
