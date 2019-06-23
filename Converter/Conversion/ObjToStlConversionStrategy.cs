@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Converter.Documents;
+using Converter.Utils;
 
 namespace Converter.Conversion
 {
@@ -9,7 +10,7 @@ namespace Converter.Conversion
     {
         private readonly ObjReader _reader;
         private readonly StlWriter _writer;
-        
+
         public ObjToStlConversionStrategy()
         {
             _reader = new ObjReader();
@@ -32,11 +33,6 @@ namespace Converter.Conversion
 
             foreach (var face in source.Faces)
             {
-                if (IsClockWiseOrder(face))
-                {
-                    ReverseVertexOrder(face);
-                }
-
                 if (face.GeometricVertexReferences.Count > 3)
                 {
                     var clippedTriangles = EarClip(source.GeometricVertices, face);
@@ -47,24 +43,25 @@ namespace Converter.Conversion
                 }
                 else
                 {
-                    // TODO: calculate norm if not provided
                     // Reference numbers start from 1
-                    var v1 = source.GeometricVertices[face.GeometricVertexReferences[0] - 1];
-                    var v2 = source.GeometricVertices[face.GeometricVertexReferences[1] - 1];
-                    var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1];
+                    var v1 = source.GeometricVertices[face.GeometricVertexReferences[0] - 1].ToVector3();
+                    var v2 = source.GeometricVertices[face.GeometricVertexReferences[1] - 1].ToVector3();
+                    var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
+                    var normal = CalculateTriangleNormal(v1, v2, v3);
 
-                    result.Add(new Triangle(Vector3.Zero, new Vector3[3]
-                    {
-                        new Vector3(v1.X, v1.Y, v1.Z),
-                        new Vector3(v2.X, v2.Y, v2.Z),
-                        new Vector3(v3.X, v3.Y, v3.Z)
-                    }));
+                    result.Add(new Triangle(normal, new Vector3[3] {v1, v2, v3}));
                 }
             }
-
             return new StlDocument(result);
         }
 
+        private Vector3 CalculateTriangleNormal(Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            var u = v2 - v1;
+            var v = v3 - v1;
+            var norm = Vector3.Cross(u, v);
+            return Vector3.Normalize(norm);
+        }
 
         private List<Triangle> EarClip(List<Vector4> geometricVertices, Face face)
         {
@@ -77,30 +74,17 @@ namespace Converter.Conversion
             }
 
             var result = new List<Triangle>();
-
             for (var i = 1; i < faceVertices.Length - 1; ++i)
             {
-                result.Add(new Triangle(Vector3.Zero, new Vector3[3]
+                var normal = CalculateTriangleNormal(faceVertices[0], faceVertices[i], faceVertices[i + 1]);
+                result.Add(new Triangle(normal, new Vector3[3]
                 {
                     faceVertices[0],
                     faceVertices[i],
                     faceVertices[i + 1]
                 }));
             }
-
             return result;
-        }
-
-        private bool IsClockWiseOrder(Face face)
-        {
-            return false;
-        }
-
-        private void ReverseVertexOrder(Face face)
-        {
-            face.GeometricVertexReferences.Reverse();
-            face.NormalVertexReferences.Reverse();
-            face.TextureVertexReferences.Reverse();
         }
     }
 }

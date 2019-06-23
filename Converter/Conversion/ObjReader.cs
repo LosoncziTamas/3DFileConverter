@@ -31,8 +31,8 @@ namespace Converter.Conversion
                         continue;
                     }
 
-                    var firstChar = trimmedLine[0];
-                    if (firstChar == '#' || firstChar == 'g')
+                    var isComment = trimmedLine[0]  == '#';
+                    if (isComment)
                     {
                         continue;
                     }
@@ -65,7 +65,7 @@ namespace Converter.Conversion
                     }
                     else
                     {
-                        Debug.Fail("Invalid obj format");
+                        Debug.Print("Unexpected line {0}", trimmedLine);
                     }
                 }
             }
