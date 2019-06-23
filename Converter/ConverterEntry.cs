@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CommandLine;
@@ -57,9 +56,7 @@ namespace Converter
         }
 
         private static void ProcessOptions(CommandLineOptions opts)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            
+        {            
             var defaultSupportedConversion = SupportedConversions.First();
             opts.SourceFormat = string.IsNullOrEmpty(opts.SourceFormat) ? defaultSupportedConversion.SrcFormat : opts.SourceFormat;
             opts.DestinationFormat = string.IsNullOrEmpty(opts.DestinationFormat) ? defaultSupportedConversion.DstFormat : opts.DestinationFormat;
@@ -92,9 +89,6 @@ namespace Converter
                     Console.WriteLine("{0} to {1}", conversion.SrcFormat, conversion.DstFormat);
                 }
             }
-            
-            stopwatch.Stop();
-            Console.WriteLine("Total elapsed time {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
     }
 }
