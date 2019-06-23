@@ -6,7 +6,7 @@ using Converter.Utils;
 
 namespace Converter.Conversion
 {
-    public class ObjToStlConversionStrategy : IConversionStrategy<ObjDocument, StlDocument>
+    public class ObjToStlConversionStrategy : IConversionStrategy
     {
         private readonly ObjReader _reader;
         private readonly StlWriter _writer;
@@ -16,21 +16,11 @@ namespace Converter.Conversion
             _reader = new ObjReader();
             _writer = new StlWriter();
         }
-
-        public ObjDocument ReadFromStream(Stream stream)
+        
+        public void ApplyConversion(Stream inputStream, Stream outputStream)
         {
-            return _reader.ReadFromStream(stream);
-        }
-
-        public void WriteToStream(StlDocument document, Stream stream)
-        {
-            _writer.WriteToStream(document, stream);
-        }
-
-        public StlDocument ApplyConversion(ObjDocument source)
-        {
-            var result = new List<Triangle>();
-
+            var source = _reader.ReadFromStream(inputStream);
+            var triangles = new List<Triangle>();
             foreach (var face in source.Faces)
             {
                 if (face.GeometricVertexReferences.Count > 3)
@@ -38,7 +28,7 @@ namespace Converter.Conversion
                     var clippedTriangles = EarClip(source.GeometricVertices, face);
                     foreach (var clippedTriangle in clippedTriangles)
                     {
-                        result.Add(clippedTriangle);
+                        triangles.Add(clippedTriangle);
                     }
                 }
                 else
@@ -49,10 +39,10 @@ namespace Converter.Conversion
                     var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
                     var normal = CalculateTriangleNormal(v1, v2, v3);
 
-                    result.Add(new Triangle(normal, new Vector3[3] {v1, v2, v3}));
+                    triangles.Add(new Triangle(normal, new Vector3[3] {v1, v2, v3}));
                 }
             }
-            return new StlDocument(result);
+            _writer.WriteToStream(new StlDocument(triangles), outputStream);
         }
 
         private Vector3 CalculateTriangleNormal(Vector3 v1, Vector3 v2, Vector3 v3)

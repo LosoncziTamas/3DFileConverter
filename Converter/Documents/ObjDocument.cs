@@ -12,10 +12,10 @@ namespace Converter.Documents
 
         public ObjDocument(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals, List<Face> faces)
         {
-            this.GeometricVertices = geometricVertices;
-            this.TextureVertices = textureVertices;
-            this.VertexNormals = vertexNormals;
-            this.Faces = faces;
+            GeometricVertices = geometricVertices;
+            TextureVertices = textureVertices;
+            VertexNormals = vertexNormals;
+            Faces = faces;
         }
     }
     
