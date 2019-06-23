@@ -16,25 +16,15 @@ namespace Converter.Documents
     
     public class Triangle
     {
-        private Vector3[] vertices;
-        private Vector3 norm;
-        private ushort attributeByteCount;
+        public readonly Vector3[] Vertices;
+        public readonly Vector3 Norm;
+        public readonly ushort AttributeByteCount;
 
         public Triangle(Vector3 norm, Vector3[] vertices)
         {
-            this.vertices = vertices;
-            this.norm = norm;
-            attributeByteCount = 0;
-        }
-            
-        public void Write(BinaryWriter writer)
-        {
-            norm.Write(writer);
-            for (var i = 0; i < 3; ++i)
-            {
-                vertices[i].Write(writer);
-            }
-            writer.Write(attributeByteCount);
+            Vertices = vertices;
+            Norm = norm;
+            AttributeByteCount = 0;
         }
     }
 }

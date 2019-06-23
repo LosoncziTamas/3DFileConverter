@@ -5,13 +5,6 @@ namespace Converter.Utils
 {
     public static class Extensions
     {
-        public static void Write(this Vector3 vec, BinaryWriter writer)
-        {
-            writer.Write(vec.X);
-            writer.Write(vec.Y);
-            writer.Write(vec.Z);   
-        }
-        
         private static void DummyNormalization()
         {
             var v1 = new Vector3(-0.5f, 0.5f, 0.5f);

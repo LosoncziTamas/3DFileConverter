@@ -42,6 +42,7 @@
         <Compile Include="Conversion\IConversionStrategy.cs" />
         <Compile Include="Conversion\ObjReader.cs" />
         <Compile Include="Conversion\ObjToStlConversionStrategy.cs" />
+        <Compile Include="Conversion\StlWriter.cs" />
         <Compile Include="ConverterEntry.cs" />
         <Compile Include="Documents\IDocument.cs" />
         <Compile Include="Documents\ObjDocument.cs" />

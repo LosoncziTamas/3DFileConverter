@@ -8,7 +8,7 @@ namespace Converter.Conversion
         where Destination : IDocument
     {
         Source ReadFromStream(Stream stream);
-        void WriteToStream(Destination d, Stream stream);
+        void WriteToStream(Destination document, Stream stream);
         Destination ApplyConversion(Source source);
     }
 }

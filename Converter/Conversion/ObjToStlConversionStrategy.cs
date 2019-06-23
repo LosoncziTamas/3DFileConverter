@@ -1,42 +1,36 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Text;
 using Converter.Documents;
 
 namespace Converter.Conversion
 {
     public class ObjToStlConversionStrategy : IConversionStrategy<ObjDocument, StlDocument>
     {
-        private const int HeaderSize = 80;
-        
         private readonly ObjReader _reader;
+        private readonly StlWriter _writer;
+        
         public ObjToStlConversionStrategy()
         {
             _reader = new ObjReader();
+            _writer = new StlWriter();
         }
 
         public ObjDocument ReadFromStream(Stream stream)
         {
-            return _reader.ReadObjFile(stream);
+            return _reader.ReadFromStream(stream);
         }
 
-        public void WriteToStream(StlDocument d, Stream stream)
+        public void WriteToStream(StlDocument document, Stream stream)
         {
-            using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
-            {
-                var header = new byte[HeaderSize];
-                writer.Write(header);
-                writer.Write((uint) d.Triangles.Count);
-                d.Triangles.ForEach(triangle => triangle.Write(writer));
-            }
+            _writer.WriteToStream(document, stream);
         }
 
         public StlDocument ApplyConversion(ObjDocument source)
         {
             var result = new List<Triangle>();
 
-            foreach (var face in source.faces)
+            foreach (var face in source.Faces)
             {
                 if (IsClockWiseOrder(face))
                 {
@@ -45,7 +39,7 @@ namespace Converter.Conversion
 
                 if (face.GeometricVertexReferences.Count > 3)
                 {
-                    var clippedTriangles = EarClip(source.geometricVertices, face);
+                    var clippedTriangles = EarClip(source.GeometricVertices, face);
                     foreach (var clippedTriangle in clippedTriangles)
                     {
                         result.Add(clippedTriangle);
@@ -53,11 +47,11 @@ namespace Converter.Conversion
                 }
                 else
                 {
-                    //TODO: calculate norm if not provided
+                    // TODO: calculate norm if not provided
                     // Reference numbers start from 1
-                    var v1 = source.geometricVertices[face.GeometricVertexReferences[0] - 1];
-                    var v2 = source.geometricVertices[face.GeometricVertexReferences[1] - 1];
-                    var v3 = source.geometricVertices[face.GeometricVertexReferences[2] - 1];
+                    var v1 = source.GeometricVertices[face.GeometricVertexReferences[0] - 1];
+                    var v2 = source.GeometricVertices[face.GeometricVertexReferences[1] - 1];
+                    var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1];
 
                     result.Add(new Triangle(Vector3.Zero, new Vector3[3]
                     {

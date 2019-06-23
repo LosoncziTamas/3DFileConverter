@@ -5,17 +5,17 @@ namespace Converter.Documents
 {
     public class ObjDocument : IDocument
     {
-        public List<Vector4> geometricVertices;
-        public List<Vector3> textureVertices;
-        public List<Vector3> vertexNormals;
-        public List<Face> faces;
+        public readonly List<Vector4> GeometricVertices;
+        public readonly List<Vector3> TextureVertices;
+        public readonly List<Vector3> VertexNormals;
+        public readonly List<Face> Faces;
 
         public ObjDocument(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals, List<Face> faces)
         {
-            this.geometricVertices = geometricVertices;
-            this.textureVertices = textureVertices;
-            this.vertexNormals = vertexNormals;
-            this.faces = faces;
+            this.GeometricVertices = geometricVertices;
+            this.TextureVertices = textureVertices;
+            this.VertexNormals = vertexNormals;
+            this.Faces = faces;
         }
     }
     

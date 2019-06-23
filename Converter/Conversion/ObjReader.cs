@@ -14,7 +14,7 @@ namespace Converter.Conversion
         private static readonly Regex VerticesAndNormals = new Regex(@"^\d+\/\/\d+$");
         private static readonly Regex VerticesAndTexture = new Regex(@"^\d+\/\d+$");
         private static readonly Regex Complete = new Regex(@"^\d+\/\d+\/\d+$");
-        public ObjDocument ReadObjFile(Stream stream)
+        public ObjDocument ReadFromStream(Stream stream)
         {
             var geometricVertices = new List<Vector4>();
             var textureVertices = new List<Vector3>();
