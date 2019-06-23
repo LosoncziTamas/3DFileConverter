@@ -9,14 +9,9 @@ Open a terminal and navigate to the appropriate bin folder (ex: bin/Release). Th
 ```bash
 Converter -i ..\..\..\SampleFiles\cow.obj
 ```
-This converts the cow.obj and creates a corresponding cow.stl file in the folder you are in.
-Use the --help command to display all the options.
+This converts cow.obj and creates a corresponding cow.stl file in the folder you are in.
+You can use the --help command to display all the available options.
 ```bash>
-Converter --help
-
-3D File Converter 1.0.0.0
-Copyright c 2019 Tamas Losonczi
-
   -i, --input        Required. Input filename
 
   -o, --output       Name of the output file. Input filename is used if not specified.
@@ -28,4 +23,4 @@ Copyright c 2019 Tamas Losonczi
   --help             Display this help screen.
 
   --version          Display version information.
-  ```
+```
