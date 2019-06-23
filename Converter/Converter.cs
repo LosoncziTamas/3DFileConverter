@@ -52,7 +52,7 @@ namespace Converter
         
         public static void Main(string[] args)
         {
-            var inputPath = "teapot.obj";
+            var inputPath = "airboat.obj";
             var outputPath = "obj_test.stl";
 
             var strategy = new ObjToStlConversionStrategy();
@@ -76,8 +76,11 @@ namespace Converter
 
                 if (face.GeometricVertexReferences.Count > 3)
                 {
-                    EarClip(face);
-                    // TODO
+                    var clippedTriangles = EarClip(objDocument.geometricVertices, face);
+                    foreach (var clippedTriangle in clippedTriangles)
+                    {
+                        result.Add(clippedTriangle);
+                    }
                 }
                 else
                 {           
@@ -99,9 +102,29 @@ namespace Converter
             return new StlDocument(result);
         }
 
-        private static void EarClip(ObjReader.Face face)
+        private static List<Triangle> EarClip(List<Vector4> geometricVertices, ObjReader.Face face)
         {
-            
+            var faceVertexCount = face.GeometricVertexReferences.Count;
+            Vector3[] faceVertices = new Vector3[faceVertexCount];
+            for (var i = 0; i < faceVertexCount; i++)
+            {
+                var geoVertex = geometricVertices[face.GeometricVertexReferences[i] - 1];
+                faceVertices[i] =  new Vector3(geoVertex.X, geoVertex.Y, geoVertex.Z);
+            }
+
+            var result = new List<Triangle>();
+
+            for (var i = 1; i < faceVertices.Length - 1; ++i)
+            {
+                result.Add(new Triangle(Vector3.Zero, new Vector3[3]
+                {
+                   faceVertices[0], 
+                   faceVertices[i], 
+                   faceVertices[i + 1]
+                }));
+            }
+
+            return result;
         }
 
         private static bool IsClockWiseOrder(ObjReader.Face face)

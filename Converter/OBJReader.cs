@@ -10,42 +10,6 @@ namespace Converter
 {
     public class ObjReader : Converter.IDocumentReader<ObjDocument>
     {
-        private const string TestObjFile =
-              @"#	                Vertices: 8
-                #	                  Points: 0
-                #	                   Lines: 0
-                #	                   Faces: 6
-                #	               Materials: 1
-                
-                        o 1
-                
-                # Vertex list
-                
-                        v -0.5 -0.5 0.5
-                        v -0.5 -0.5 -0.5
-                        v -0.5 0.5 -0.5
-                        v -0.5 0.5 0.5
-                        v 0.5 -0.5 0.5
-                        v 0.5 -0.5 -0.5
-                        v 0.5 0.5 -0.5
-                        v 0.5 0.5 0.5
-                
-                # Point/Line/Face list
-                
-                        usemtl Default
-                        f 4 3 2 1
-                        f 2 6 5 1
-                        f 3 7 6 2
-                        f 8 7 3 4
-                        f 5 8 4 1
-                        f 6 7 8 5
-                
-                # End of file";
-        
-        //TestObjFile.Split('\n');
-
-
-
         public static ObjDocument ReadObjFile(Stream stream)
         {
             // TODO: add 'global' face pattern variable
@@ -68,7 +32,7 @@ namespace Converter
                     }
 
                     var firstChar = trimmedLine[0];
-                    if (firstChar == '#')
+                    if (firstChar == '#' || firstChar == 'g')
                     {
                         continue;
                     }
