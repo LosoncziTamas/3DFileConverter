@@ -47,7 +47,7 @@ namespace Converter
 
         private static readonly List<Conversion> SupportedConversions = new List<Conversion>
         {
-            new Conversion(".obj", ".stl", new ObjToStlConversionStrategy()),
+            new Conversion(".obj", ".stl", new ObjToStlConversionStrategy())
         };
 
         public static void Main(string[] args)
@@ -74,7 +74,11 @@ namespace Converter
 
                 try
                 {
-                    conversionType.ConversionStrategy.ApplyConversion(File.Open(inputPath, FileMode.Open),File.Open(outputPath, FileMode.Create));
+                    var reader = new ObjReader();
+                    var writer = new StlWriter();
+                    var mesh = reader.ReadFromStream(File.Open(inputPath, FileMode.Open));
+                    writer.WriteToStream(mesh, File.Open(outputPath, FileMode.Create));
+                    //conversionType.ConversionStrategy.ApplyConversion(File.Open(inputPath, FileMode.Open),File.Open(outputPath, FileMode.Create));
                 }
                 catch (FormatException e)
                 {

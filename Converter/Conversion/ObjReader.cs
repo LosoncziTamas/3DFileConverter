@@ -1,27 +1,28 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using Converter.Data;
 using Converter.Documents;
 
 namespace Converter.Conversion
 {
-    public class ObjReader
+    public class ObjReader : IMeshReader
     {
         private static readonly Regex OnlyVertices = new Regex(@"^\d+$");
         private static readonly Regex VerticesAndNormals = new Regex(@"^\d+\/\/\d+$");
         private static readonly Regex VerticesAndTexture = new Regex(@"^\d+\/\d+$");
         private static readonly Regex Complete = new Regex(@"^\d+\/\d+\/\d+$");
-        public ObjDocument ReadFromStream(Stream stream)
+        
+        public Mesh ReadFromStream(Stream inputStream)
         {
             var geometricVertices = new List<Vector4>();
             var textureVertices = new List<Vector3>();
             var vertexNormals = new List<Vector3>();
-            var faces = new List<Face>();
+            var faces = new List<ObjDocument.Face>();
 
-            using (var reader = new StreamReader(stream))
+            using (var reader = new StreamReader(inputStream))
             {
                 while (reader.Peek() > -1)
                 {
@@ -61,12 +62,13 @@ namespace Converter.Conversion
                     }
                 }
             }
-
-            return new ObjDocument(
-                geometricVertices,
-                textureVertices,
-                vertexNormals,
-                faces);
+            
+            var obj = new ObjDocument(
+            geometricVertices,
+            textureVertices,
+            vertexNormals,
+            faces);
+            return ObjDocument.ToMesh(obj); 
         }
 
         private Vector3 ParseVertexNormal(string str)
@@ -132,11 +134,11 @@ namespace Converter.Conversion
             throw new FormatException("Vertex parsing failed.");
         }
 
-        public static Face ParseFace(string str)
+        public static ObjDocument.Face ParseFace(string str)
         {
             var faceLayout = DetermineFaceLayout(str);
             var faceElementsPerLine = str.Split(' ');
-            var result = new Face();
+            var result = new ObjDocument.Face();
             foreach (var faceStr in faceElementsPerLine)
             {
                 if (faceLayout != null && faceLayout.IsMatch(faceStr))

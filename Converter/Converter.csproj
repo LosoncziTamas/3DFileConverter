@@ -44,12 +44,15 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Conversion\IConversionStrategy.cs" />
+        <Compile Include="Conversion\IMeshReader.cs" />
+        <Compile Include="Conversion\IMeshWriter.cs" />
         <Compile Include="Conversion\ObjReader.cs" />
         <Compile Include="Conversion\ObjToStlConversionStrategy.cs" />
         <Compile Include="Conversion\StlWriter.cs" />
         <Compile Include="ConverterEntry.cs" />
-        <Compile Include="Documents\ObjDocument.cs" />
-        <Compile Include="Documents\StlDocument.cs" />
+        <Compile Include="Data\Mesh.cs" />
+        <Compile Include="Data\ObjDocument.cs" />
+        <Compile Include="Data\StlDocument.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Utils\Extensions.cs" />
     </ItemGroup>

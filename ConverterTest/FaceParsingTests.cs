@@ -2,6 +2,7 @@
 using System.Linq;
 using Converter;
 using Converter.Conversion;
+using Converter.Data;
 using Converter.Documents;
 using NUnit.Framework;
 

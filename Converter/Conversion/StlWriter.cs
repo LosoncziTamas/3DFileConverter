@@ -1,25 +1,15 @@
 using System.IO;
 using System.Numerics;
+using Converter.Data;
 using Converter.Documents;
 
 namespace Converter.Conversion
 {
-    public class StlWriter
+    public class StlWriter : IMeshWriter
     {
         private const int HeaderSize = 80;
-        
-        public void WriteToStream(StlDocument stlDocument, Stream stream)
-        {
-            using (var writer = new BinaryWriter(stream))
-            {
-                var header = new byte[HeaderSize];
-                writer.Write(header);
-                writer.Write((uint) stlDocument.Triangles.Count);
-                stlDocument.Triangles.ForEach(triangle => WriteTriangle(triangle, writer));
-            }
-        }
              
-        private void WriteTriangle(Triangle triangle, BinaryWriter writer)
+        private void WriteTriangle(StlDocument.Triangle triangle, BinaryWriter writer)
         {
             WriteVector3(triangle.Norm, writer);
             for (var i = 0; i < 3; ++i)
@@ -34,6 +24,18 @@ namespace Converter.Conversion
             writer.Write(vec.X);
             writer.Write(vec.Y);
             writer.Write(vec.Z);  
+        }
+
+        public void WriteToStream(Mesh mesh, Stream outputStream)
+        {
+            var stl = StlDocument.FromMesh(mesh);
+            using (var writer = new BinaryWriter(outputStream))
+            {
+                var header = new byte[HeaderSize];
+                writer.Write(header);
+                writer.Write((uint) stl.Triangles.Count);
+                stl.Triangles.ForEach(triangle => WriteTriangle(triangle, writer));
+            }
         }
     }
 }
