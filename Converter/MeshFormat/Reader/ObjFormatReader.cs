@@ -71,7 +71,7 @@ namespace Converter.MeshFormat.Reader
             return ObjFormat.ToMesh(obj);
         }
 
-        private Vector3 ParseVertexNormal(string str)
+        internal Vector3 ParseVertexNormal(string str)
         {
             var vertices = str.Split(' ');
             if (vertices.Length != 3)
@@ -112,7 +112,7 @@ namespace Converter.MeshFormat.Reader
             throw new FormatException("Texture Vertex parsing failed.");
         }
 
-        private Vector4 ParseGeometricVertex(string str)
+        internal Vector4 ParseGeometricVertex(string str)
         {
             var vertices = str.Split(' ');
             if (vertices.Length != 3)

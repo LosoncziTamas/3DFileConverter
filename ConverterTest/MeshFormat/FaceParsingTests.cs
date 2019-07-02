@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Converter;
+using Converter.MeshFormat;
 using Converter.MeshFormat.Reader;
 using NUnit.Framework;
 
-namespace ConverterTest
+namespace ConverterTest.MeshFormat
 {
     [TestFixture]
     public class FaceParsingTests
@@ -13,7 +13,7 @@ namespace ConverterTest
         public void TestFaceParse1()
         {
             // given
-            var expected = new Face();
+            var expected = new ObjFormat.Face();
             expected.GeometricVertexReferences.AddRange(new List<int> {3, 4, 25, 26});
             var onlyVertexLayout = "3 4 25 26";
 
@@ -28,7 +28,7 @@ namespace ConverterTest
         public void TestFaceParse2()
         {
             // given
-            var expected = new Face();
+            var expected = new ObjFormat.Face();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             var vertexAndNormalLayout = "1//1 2//2 3//3 4//4";
@@ -45,7 +45,7 @@ namespace ConverterTest
         public void TestFaceParse3()
         {
             // given
-            var expected = new Face();
+            var expected = new ObjFormat.Face();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
@@ -64,7 +64,7 @@ namespace ConverterTest
         public void TestFaceParse4()
         {
             // given
-            var expected = new Face();
+            var expected = new ObjFormat.Face();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             var vertexAndTextureLayout = "1/1 2/2 3/3 4/4";
