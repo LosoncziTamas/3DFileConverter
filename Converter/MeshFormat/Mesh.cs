@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace Converter.Documents
+namespace Converter.MeshFormat
 {
     public class Mesh
     {
@@ -16,7 +16,7 @@ namespace Converter.Documents
                 Norm = norm;
             }
         }
-        
+
         public readonly List<Triangle> Triangles;
 
         public Mesh(List<Triangle> triangles)

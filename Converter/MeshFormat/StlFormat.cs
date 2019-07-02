@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Converter.Documents;
 
-namespace Converter.Data
+namespace Converter.MeshFormat
 {
     public class StlDocument
     {
@@ -30,7 +29,7 @@ namespace Converter.Data
 
         public static StlDocument FromMesh(Mesh mesh)
         {
-            var result = mesh.Triangles.Select(meshTriangle => new StlDocument.Triangle(meshTriangle.Norm, meshTriangle.Vertices));
+            var result = mesh.Triangles.Select(meshTriangle => new Triangle(meshTriangle.Norm, meshTriangle.Vertices));
             return new StlDocument(result.ToList());
         }
     }

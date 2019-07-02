@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using Converter.Data;
-using Converter.Documents;
 
-namespace Converter.Conversion
+namespace Converter.MeshFormat.Reader
 {
-    public class ObjReader : IMeshReader
+    public class ObjFormatReader : IMeshFormatReader
     {
         private static readonly Regex OnlyVertices = new Regex(@"^\d+$");
         private static readonly Regex VerticesAndNormals = new Regex(@"^\d+\/\/\d+$");
         private static readonly Regex VerticesAndTexture = new Regex(@"^\d+\/\d+$");
         private static readonly Regex Complete = new Regex(@"^\d+\/\d+\/\d+$");
-        
+
+        public string Tag => ".obj";
+
         public Mesh ReadFromStream(Stream inputStream)
         {
             var geometricVertices = new List<Vector4>();
             var textureVertices = new List<Vector3>();
             var vertexNormals = new List<Vector3>();
-            var faces = new List<ObjDocument.Face>();
+            var faces = new List<ObjFormat.Face>();
 
             using (var reader = new StreamReader(inputStream))
             {
@@ -32,7 +32,7 @@ namespace Converter.Conversion
                         continue;
                     }
 
-                    var isComment = trimmedLine[0]  == '#';
+                    var isComment = trimmedLine[0] == '#';
                     if (isComment)
                     {
                         continue;
@@ -62,13 +62,13 @@ namespace Converter.Conversion
                     }
                 }
             }
-            
-            var obj = new ObjDocument(
-            geometricVertices,
-            textureVertices,
-            vertexNormals,
-            faces);
-            return ObjDocument.ToMesh(obj); 
+
+            var obj = new ObjFormat(
+                geometricVertices,
+                textureVertices,
+                vertexNormals,
+                faces);
+            return ObjFormat.ToMesh(obj);
         }
 
         private Vector3 ParseVertexNormal(string str)
@@ -108,6 +108,7 @@ namespace Converter.Conversion
 
                 return result;
             }
+
             throw new FormatException("Texture Vertex parsing failed.");
         }
 
@@ -131,14 +132,15 @@ namespace Converter.Conversion
 
                 return result;
             }
+
             throw new FormatException("Vertex parsing failed.");
         }
 
-        public static ObjDocument.Face ParseFace(string str)
+        public static ObjFormat.Face ParseFace(string str)
         {
             var faceLayout = DetermineFaceLayout(str);
             var faceElementsPerLine = str.Split(' ');
-            var result = new ObjDocument.Face();
+            var result = new ObjFormat.Face();
             foreach (var faceStr in faceElementsPerLine)
             {
                 if (faceLayout != null && faceLayout.IsMatch(faceStr))
@@ -205,6 +207,7 @@ namespace Converter.Conversion
             {
                 throw new FormatException($"Not recognizable .obj face element layout: {str}");
             }
+
             return usedPattern;
         }
     }

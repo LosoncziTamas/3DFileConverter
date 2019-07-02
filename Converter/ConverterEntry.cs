@@ -3,31 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CommandLine;
-using Converter.Conversion;
+using Converter.MeshFormat.Reader;
+using Converter.MeshFormat.Writer;
 
 namespace Converter
 {
     public static class ConverterEntry
     {
-        class Conversion
-        {
-            public readonly string SrcFormat;
-            public readonly string DstFormat;
-            public readonly IConversionStrategy ConversionStrategy;
-
-            public Conversion(string srcFormat, string dstFormat, IConversionStrategy conversionStrategy)
-            {
-                SrcFormat = srcFormat;
-                DstFormat = dstFormat;
-                ConversionStrategy = conversionStrategy;
-            }
-
-            public bool MatchesArguments(string argSrcFormat, string argDstFormat)
-            {
-                return argSrcFormat.StartsWith(SrcFormat) && argDstFormat.StartsWith(DstFormat);
-            }
-        }
-
         class CommandLineOptions
         {
             [Option('i', "input", Required = true, HelpText = "Input filename")]
@@ -45,9 +27,14 @@ namespace Converter
             public string DestinationFormat { get; set; }
         }
 
-        private static readonly List<Conversion> SupportedConversions = new List<Conversion>
+        private static readonly List<IMeshFormatReader> FormatReaders = new List<IMeshFormatReader>
         {
-            new Conversion(".obj", ".stl", new ObjToStlConversionStrategy())
+            new ObjFormatReader()
+        };
+
+        private static readonly List<IMeshFormatWriter> FormatWriters = new List<IMeshFormatWriter>
+        {
+            new StlFormatWriter()
         };
 
         public static void Main(string[] args)
@@ -56,16 +43,20 @@ namespace Converter
         }
 
         private static void ProcessOptions(CommandLineOptions opts)
-        {            
-            var defaultSupportedConversion = SupportedConversions.First();
-            opts.SourceFormat = string.IsNullOrEmpty(opts.SourceFormat) ? defaultSupportedConversion.SrcFormat : opts.SourceFormat;
-            opts.DestinationFormat = string.IsNullOrEmpty(opts.DestinationFormat) ? defaultSupportedConversion.DstFormat : opts.DestinationFormat;
-            
-            var conversionType = SupportedConversions.FirstOrDefault(c => c.MatchesArguments(opts.SourceFormat, opts.DestinationFormat));
-            if (conversionType != null)
+        {
+            var defaultSrcFormat = FormatReaders.First().Tag;
+            var defaultDstFormat = FormatWriters.First().Tag;
+            opts.SourceFormat = string.IsNullOrEmpty(opts.SourceFormat) ? defaultSrcFormat : opts.SourceFormat;
+            opts.DestinationFormat = string.IsNullOrEmpty(opts.DestinationFormat) ? defaultDstFormat : opts.DestinationFormat;
+
+            var reader = FormatReaders.FirstOrDefault(r => r.Tag.StartsWith(opts.SourceFormat));
+            var writer = FormatWriters.FirstOrDefault(r => r.Tag.StartsWith(opts.DestinationFormat));
+            if (reader != null && writer != null)
             {
                 var inputPath = opts.InputFile;
-                var outputPath = string.IsNullOrEmpty(opts.OutputFile) ? Path.GetFileNameWithoutExtension(inputPath) + opts.DestinationFormat : opts.OutputFile;
+                var outputPath = string.IsNullOrEmpty(opts.OutputFile)
+                    ? Path.GetFileNameWithoutExtension(inputPath) + opts.DestinationFormat
+                    : opts.OutputFile;
                 if (!File.Exists(inputPath))
                 {
                     Console.WriteLine("Provided input file does not exist.");
@@ -74,11 +65,8 @@ namespace Converter
 
                 try
                 {
-                    var reader = new ObjReader();
-                    var writer = new StlWriter();
                     var mesh = reader.ReadFromStream(File.Open(inputPath, FileMode.Open));
                     writer.WriteToStream(mesh, File.Open(outputPath, FileMode.Create));
-                    //conversionType.ConversionStrategy.ApplyConversion(File.Open(inputPath, FileMode.Open),File.Open(outputPath, FileMode.Create));
                 }
                 catch (FormatException e)
                 {
@@ -87,11 +75,23 @@ namespace Converter
             }
             else
             {
-                Console.WriteLine("Currently, the following conversions are supported.");
-                foreach (var conversion in SupportedConversions)
-                {
-                    Console.WriteLine("{0} to {1}", conversion.SrcFormat, conversion.DstFormat);
-                }
+                PrintSupportedConversions();
+            }
+        }
+
+        private static void PrintSupportedConversions()
+        {
+            Console.WriteLine("Currently, the following conversions are supported.");
+            Console.WriteLine("Reading: ");
+            foreach (var reader in FormatReaders)
+            {
+                Console.WriteLine(reader.Tag);
+            }
+
+            Console.WriteLine("Writing: ");
+            foreach (var writer in FormatWriters)
+            {
+                Console.WriteLine(writer.Tag);
             }
         }
     }

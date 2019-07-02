@@ -1,14 +1,14 @@
 using System.IO;
 using System.Numerics;
-using Converter.Data;
-using Converter.Documents;
 
-namespace Converter.Conversion
+namespace Converter.MeshFormat.Writer
 {
-    public class StlWriter : IMeshWriter
+    public class StlFormatWriter : IMeshFormatWriter
     {
         private const int HeaderSize = 80;
-             
+
+        public string Tag => ".stl";
+
         private void WriteTriangle(StlDocument.Triangle triangle, BinaryWriter writer)
         {
             WriteVector3(triangle.Norm, writer);
@@ -16,6 +16,7 @@ namespace Converter.Conversion
             {
                 WriteVector3(triangle.Vertices[i], writer);
             }
+
             writer.Write(triangle.AttributeByteCount);
         }
 
@@ -23,7 +24,7 @@ namespace Converter.Conversion
         {
             writer.Write(vec.X);
             writer.Write(vec.Y);
-            writer.Write(vec.Z);  
+            writer.Write(vec.Z);
         }
 
         public void WriteToStream(Mesh mesh, Stream outputStream)

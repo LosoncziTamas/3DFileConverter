@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Numerics;
-using Converter.Documents;
 using Converter.Utils;
 
-namespace Converter.Data
+namespace Converter.MeshFormat
 {
-    public class ObjDocument
+    public class ObjFormat
     {
         public class Face
         {
@@ -20,29 +19,29 @@ namespace Converter.Data
                 NormalVertexReferences = new List<int>();
             }
         }
-        
-        public readonly List<Vector4> GeometricVertices;
-        public readonly List<Vector3> TextureVertices;
-        public readonly List<Vector3> VertexNormals;
-        public readonly List<Face> Faces;
 
-        public ObjDocument(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals,
+        private readonly List<Vector4> _geometricVertices;
+        private readonly List<Vector3> _textureVertices;
+        private readonly List<Vector3> _vertexNormals;
+        private readonly List<Face> _faces;
+
+        public ObjFormat(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals,
             List<Face> faces)
         {
-            GeometricVertices = geometricVertices;
-            TextureVertices = textureVertices;
-            VertexNormals = vertexNormals;
-            Faces = faces;
+            _geometricVertices = geometricVertices;
+            _textureVertices = textureVertices;
+            _vertexNormals = vertexNormals;
+            _faces = faces;
         }
 
-        public static Mesh ToMesh(ObjDocument source)
+        public static Mesh ToMesh(ObjFormat source)
         {
             var triangles = new List<Mesh.Triangle>();
-            foreach (var face in source.Faces)
+            foreach (var face in source._faces)
             {
                 if (face.GeometricVertexReferences.Count > 3)
                 {
-                    var clippedTriangles = EarClip(source.GeometricVertices, face);
+                    var clippedTriangles = PerformEarClipping(source._geometricVertices, face);
                     foreach (var clippedTriangle in clippedTriangles)
                     {
                         triangles.Add(clippedTriangle);
@@ -51,14 +50,15 @@ namespace Converter.Data
                 else
                 {
                     // Reference numbers start from 1
-                    var v1 = source.GeometricVertices[face.GeometricVertexReferences[0] - 1].ToVector3();
-                    var v2 = source.GeometricVertices[face.GeometricVertexReferences[1] - 1].ToVector3();
-                    var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
+                    var v1 = source._geometricVertices[face.GeometricVertexReferences[0] - 1].ToVector3();
+                    var v2 = source._geometricVertices[face.GeometricVertexReferences[1] - 1].ToVector3();
+                    var v3 = source._geometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
                     var normal = CalculateTriangleNormal(v1, v2, v3);
 
                     triangles.Add(new Mesh.Triangle(new Vector3[3] {v1, v2, v3}, normal));
                 }
             }
+
             return new Mesh(triangles);
         }
 
@@ -70,7 +70,7 @@ namespace Converter.Data
             return Vector3.Normalize(norm);
         }
 
-        private static List<Mesh.Triangle> EarClip(List<Vector4> geometricVertices, Face face)
+        private static List<Mesh.Triangle> PerformEarClipping(List<Vector4> geometricVertices, Face face)
         {
             var faceVertexCount = face.GeometricVertexReferences.Count;
             var faceVertices = new Vector3[faceVertexCount];
@@ -84,7 +84,7 @@ namespace Converter.Data
             for (var i = 1; i < faceVertices.Length - 1; ++i)
             {
                 var normal = CalculateTriangleNormal(faceVertices[0], faceVertices[i], faceVertices[i + 1]);
-                result.Add(new Mesh.Triangle( new Vector3[3]
+                result.Add(new Mesh.Triangle(new Vector3[3]
                 {
                     faceVertices[0],
                     faceVertices[i],
