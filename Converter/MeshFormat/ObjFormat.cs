@@ -30,7 +30,7 @@ namespace Converter.MeshFormat
             GeometricVertices = new List<Vector4>();
             TextureVertices = new List<Vector3>();
             VertexNormals = new List<Vector3>();
-            Faces = new List<ObjFormat.Face>();
+            Faces = new List<Face>();
         }
 
         public static Mesh ToMesh(ObjFormat source)
