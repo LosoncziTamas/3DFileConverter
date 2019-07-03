@@ -1,28 +1,22 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Converter.MeshFormat.Reader
 {
     public class ObjFormatReader : IMeshFormatReader
-    {
+    {        
         private static readonly Regex OnlyVertices = new Regex(@"^[\-]*\d+$");
-        private static readonly Regex VerticesAndNormals = new Regex(@"^\d+\/\/\d+$");
-        private static readonly Regex VerticesAndTexture = new Regex(@"^\d+\/\d+$");
-        private static readonly Regex Complete = new Regex(@"^\d+\/\d+\/\d+$");
+        private static readonly Regex VerticesAndNormals = new Regex(@"^[\-]*\d+\/\/[\-]*\d+$");
+        private static readonly Regex VerticesAndTexture = new Regex(@"^[\-]*\d+\/[\-]*\d+$");
+        private static readonly Regex Complete = new Regex(@"^[\-]*\d+\/[\-]*\d+\/[\-]*\d+$");
 
         public string Tag => ".obj";
 
         public Mesh ReadFromStream(Stream inputStream)
-        {
-            var geometricVertices = new List<Vector4>();
-            var textureVertices = new List<Vector3>();
-            var vertexNormals = new List<Vector3>();
-            var faces = new List<ObjFormat.Face>();
-
+        {            
+            var obj = new ObjFormat();
             using (var reader = new StreamReader(inputStream))
             {
                 while (reader.Peek() > -1)
@@ -48,27 +42,21 @@ namespace Converter.MeshFormat.Reader
                         switch (firstWord)
                         {
                             case "v":
-                                geometricVertices.Add(ParseGeometricVertex(remainder));
+                                obj.GeometricVertices.Add(ParseGeometricVertex(remainder));
                                 break;
                             case "f":
-                                faces.Add(ParseFace(remainder, faces));
+                                obj.Faces.Add(ParseFace(remainder, obj));
                                 break;
                             case "vt":
-                                textureVertices.Add(ParseTextureVertex(remainder));
+                                obj.TextureVertices.Add(ParseTextureVertex(remainder));
                                 break;
                             case "vn":
-                                vertexNormals.Add(ParseVertexNormal(remainder));
+                                obj.VertexNormals.Add(ParseVertexNormal(remainder));
                                 break;
                         }
                     }
                 }
             }
-
-            var obj = new ObjFormat(
-                geometricVertices,
-                textureVertices,
-                vertexNormals,
-                faces);
             return ObjFormat.ToMesh(obj);
         }
 
@@ -137,25 +125,17 @@ namespace Converter.MeshFormat.Reader
             throw new FormatException("Vertex parsing failed.");
         }
 
-        private int HandleNegativeReference(ObjFormat.Face currFace, int vertexRef, List<ObjFormat.Face> faces, int faceElementsPerLine)
+        private int ParseFaceElement(string faceElement, int referenceListLength)
         {
-            var prevFace = faces.LastOrDefault();
-            if (prevFace != null)
+            var vertexRef = int.Parse(faceElement);
+            if (vertexRef < 0)
             {
-                var vertexCount = prevFace.GeometricVertexReferences.Count + faceElementsPerLine;
-                vertexRef = prevFace.GeometricVertexReferences[vertexCount + vertexRef];
+                vertexRef += referenceListLength + 1;
             }
-            else
-            {
-                
-                var vertexCount = currFace.GeometricVertexReferences.Count + faceElementsPerLine;
-                vertexRef = currFace.GeometricVertexReferences[vertexCount + vertexRef];
-            }
-
             return vertexRef;
         }
-
-        internal ObjFormat.Face ParseFace(string str, List<ObjFormat.Face> faces)
+        
+        internal ObjFormat.Face ParseFace(string str, ObjFormat obj)
         {
             var faceLayout = DetermineFaceLayout(str);
             var faceElementsPerLine = str.Split(' ');
@@ -166,31 +146,27 @@ namespace Converter.MeshFormat.Reader
                 {
                     if (faceLayout == OnlyVertices)
                     {
-                        var vertexRef = int.Parse(faceElement);
-                        if (vertexRef < 0)
-                        {
-                            //vertexRef = HandleNegativeReference();
-                        }
+                        var vertexRef = ParseFaceElement(faceElement, obj.GeometricVertices.Count);
                         result.GeometricVertexReferences.Add(vertexRef);
                     }
                     else if (faceLayout == Complete)
                     {
                         var elements = faceElement.Split('/');
-                        result.GeometricVertexReferences.Add(int.Parse(elements[0]));
-                        result.TextureVertexReferences.Add(int.Parse(elements[1]));
-                        result.NormalVertexReferences.Add(int.Parse(elements[2]));
+                        result.GeometricVertexReferences.Add(ParseFaceElement(elements[0], obj.GeometricVertices.Count));
+                        result.TextureVertexReferences.Add(ParseFaceElement(elements[1], obj.TextureVertices.Count));
+                        result.NormalVertexReferences.Add(ParseFaceElement(elements[2], obj.VertexNormals.Count));
                     }
                     else if (faceLayout == VerticesAndNormals)
                     {
                         var elements = faceElement.Split('/');
-                        result.GeometricVertexReferences.Add(int.Parse(elements[0]));
-                        result.NormalVertexReferences.Add(int.Parse(elements[2]));
+                        result.GeometricVertexReferences.Add(ParseFaceElement(elements[0], obj.GeometricVertices.Count));
+                        result.NormalVertexReferences.Add(ParseFaceElement(elements[2], obj.VertexNormals.Count));
                     }
                     else if (faceLayout == VerticesAndTexture)
                     {
                         var elements = faceElement.Split('/');
-                        result.GeometricVertexReferences.Add(int.Parse(elements[0]));
-                        result.TextureVertexReferences.Add(int.Parse(elements[1]));
+                        result.GeometricVertexReferences.Add(ParseFaceElement(elements[0], obj.GeometricVertices.Count));
+                        result.TextureVertexReferences.Add(ParseFaceElement(elements[1], obj.TextureVertices.Count));
                     }
                 }
                 else

@@ -48,11 +48,12 @@ namespace ConverterTest.MeshFormat.Reader
         {
             // given
             var expected = new ObjFormat.Face();
+            var obj = new ObjFormat();
             expected.GeometricVertexReferences.AddRange(new List<int> {3, 4, 25, 26});
             var onlyVertexLayout = "3 4 25 26";
 
             // when
-            var result = reader.ParseFace(onlyVertexLayout);
+            var result = reader.ParseFace(onlyVertexLayout, obj);
 
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -63,12 +64,13 @@ namespace ConverterTest.MeshFormat.Reader
         {
             // given
             var expected = new ObjFormat.Face();
+            var obj = new ObjFormat();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             var vertexAndNormalLayout = "1//1 2//2 3//3 4//4";
 
             // when
-            var result = reader.ParseFace(vertexAndNormalLayout);
+            var result = reader.ParseFace(vertexAndNormalLayout, obj);
 
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -80,13 +82,14 @@ namespace ConverterTest.MeshFormat.Reader
         {
             // given
             var expected = new ObjFormat.Face();
+            var obj = new ObjFormat();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.NormalVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             var completeLayout = "1/1/1 2/2/2 3/3/3 4/4/4";
 
             // when
-            var result = reader.ParseFace(completeLayout);
+            var result = reader.ParseFace(completeLayout, obj);
 
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));
@@ -99,12 +102,13 @@ namespace ConverterTest.MeshFormat.Reader
         {
             // given
             var expected = new ObjFormat.Face();
+            var obj = new ObjFormat();
             expected.GeometricVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             expected.TextureVertexReferences.AddRange(new List<int> {1, 2, 3, 4});
             var vertexAndTextureLayout = "1/1 2/2 3/3 4/4";
 
             // when
-            var result = reader.ParseFace(vertexAndTextureLayout);
+            var result = reader.ParseFace(vertexAndTextureLayout, obj);
 
             // then
             Assert.True(expected.GeometricVertexReferences.SequenceEqual(result.GeometricVertexReferences));

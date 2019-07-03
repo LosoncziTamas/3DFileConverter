@@ -20,28 +20,27 @@ namespace Converter.MeshFormat
             }
         }
 
-        private readonly List<Vector4> _geometricVertices;
-        private readonly List<Vector3> _textureVertices;
-        private readonly List<Vector3> _vertexNormals;
-        private readonly List<Face> _faces;
+        public readonly List<Vector4> GeometricVertices;
+        public readonly List<Vector3> TextureVertices;
+        public readonly List<Vector3> VertexNormals;
+        public readonly List<Face> Faces;
 
-        public ObjFormat(List<Vector4> geometricVertices, List<Vector3> textureVertices, List<Vector3> vertexNormals,
-            List<Face> faces)
+        public ObjFormat()
         {
-            _geometricVertices = geometricVertices;
-            _textureVertices = textureVertices;
-            _vertexNormals = vertexNormals;
-            _faces = faces;
+            GeometricVertices = new List<Vector4>();
+            TextureVertices = new List<Vector3>();
+            VertexNormals = new List<Vector3>();
+            Faces = new List<ObjFormat.Face>();
         }
 
         public static Mesh ToMesh(ObjFormat source)
         {
             var triangles = new List<Mesh.Triangle>();
-            foreach (var face in source._faces)
+            foreach (var face in source.Faces)
             {
                 if (face.GeometricVertexReferences.Count > 3)
                 {
-                    var clippedTriangles = PerformEarClipping(source._geometricVertices, face);
+                    var clippedTriangles = PerformEarClipping(source.GeometricVertices, face);
                     foreach (var clippedTriangle in clippedTriangles)
                     {
                         triangles.Add(clippedTriangle);
@@ -50,9 +49,9 @@ namespace Converter.MeshFormat
                 else
                 {
                     // Reference numbers start from 1
-                    var v1 = source._geometricVertices[face.GeometricVertexReferences[0] - 1].ToVector3();
-                    var v2 = source._geometricVertices[face.GeometricVertexReferences[1] - 1].ToVector3();
-                    var v3 = source._geometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
+                    var v1 = source.GeometricVertices[face.GeometricVertexReferences[0] - 1].ToVector3();
+                    var v2 = source.GeometricVertices[face.GeometricVertexReferences[1] - 1].ToVector3();
+                    var v3 = source.GeometricVertices[face.GeometricVertexReferences[2] - 1].ToVector3();
                     var normal = CalculateTriangleNormal(v1, v2, v3);
 
                     triangles.Add(new Mesh.Triangle(new Vector3[3] {v1, v2, v3}, normal));
