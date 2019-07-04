@@ -9,7 +9,7 @@ namespace Converter.MeshFormat.Writer
 
         public string Tag => ".stl";
 
-        private void WriteTriangle(StlDocument.Triangle triangle, BinaryWriter writer)
+        internal void WriteTriangle(StlFormat.Triangle triangle, BinaryWriter writer)
         {
             WriteVector3(triangle.Norm, writer);
             for (var i = 0; i < 3; ++i)
@@ -20,7 +20,7 @@ namespace Converter.MeshFormat.Writer
             writer.Write(triangle.AttributeByteCount);
         }
 
-        private void WriteVector3(Vector3 vec, BinaryWriter writer)
+        internal void WriteVector3(Vector3 vec, BinaryWriter writer)
         {
             writer.Write(vec.X);
             writer.Write(vec.Y);
@@ -29,7 +29,7 @@ namespace Converter.MeshFormat.Writer
 
         public void WriteToStream(Mesh mesh, Stream outputStream)
         {
-            var stl = StlDocument.FromMesh(mesh);
+            var stl = StlFormat.FromMesh(mesh);
             using (var writer = new BinaryWriter(outputStream))
             {
                 var header = new byte[HeaderSize];

@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Converter.MeshFormat
 {
-    public class StlDocument
+    public class StlFormat
     {
         public class Triangle
         {
@@ -22,15 +22,15 @@ namespace Converter.MeshFormat
 
         public readonly List<Triangle> Triangles;
 
-        public StlDocument(List<Triangle> triangles)
+        public StlFormat(List<Triangle> triangles)
         {
             Triangles = triangles;
         }
 
-        public static StlDocument FromMesh(Mesh mesh)
+        public static StlFormat FromMesh(Mesh mesh)
         {
             var result = mesh.Triangles.Select(meshTriangle => new Triangle(meshTriangle.Norm, meshTriangle.Vertices));
-            return new StlDocument(result.ToList());
+            return new StlFormat(result.ToList());
         }
     }
 }
