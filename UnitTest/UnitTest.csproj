@@ -60,9 +60,11 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="MeshFormat\ObjFormatTest.cs" />
         <Compile Include="MeshFormat\Reader\ObjFormatReaderTest.cs" />
         <Compile Include="MeshFormat\Writer\StlFormatWriterTest.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="TestUtils.cs" />
         <Compile Include="Utils\ExtensionsTest.cs" />
     </ItemGroup>
     <ItemGroup>

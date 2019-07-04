@@ -40,7 +40,7 @@ namespace Converter.MeshFormat
             {
                 if (face.GeometricVertexReferences.Count > 3)
                 {
-                    var clippedTriangles = PerformEarClipping(source.GeometricVertices, face);
+                    var clippedTriangles = PerformEarClipping(source.GeometricVertices, face.GeometricVertexReferences);
                     foreach (var clippedTriangle in clippedTriangles)
                     {
                         triangles.Add(clippedTriangle);
@@ -61,21 +61,21 @@ namespace Converter.MeshFormat
             return new Mesh(triangles);
         }
 
-        private static Vector3 CalculateTriangleNormal(Vector3 v1, Vector3 v2, Vector3 v3)
-        {
+        internal static Vector3 CalculateTriangleNormal(Vector3 v1, Vector3 v2, Vector3 v3)
+        {            
             var u = v2 - v1;
             var v = v3 - v1;
             var norm = Vector3.Cross(u, v);
             return Vector3.Normalize(norm);
         }
 
-        private static List<Mesh.Triangle> PerformEarClipping(List<Vector4> geometricVertices, Face face)
+        internal static List<Mesh.Triangle> PerformEarClipping(List<Vector4> geometricVertices, List<int> vertexReferences)
         {
-            var faceVertexCount = face.GeometricVertexReferences.Count;
+            var faceVertexCount = vertexReferences.Count;
             var faceVertices = new Vector3[faceVertexCount];
             for (var i = 0; i < faceVertexCount; i++)
             {
-                var geoVertex = geometricVertices[face.GeometricVertexReferences[i] - 1];
+                var geoVertex = geometricVertices[vertexReferences[i] - 1];
                 faceVertices[i] = new Vector3(geoVertex.X, geoVertex.Y, geoVertex.Z);
             }
 
