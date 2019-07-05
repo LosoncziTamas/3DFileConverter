@@ -43,13 +43,14 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Conversion\IConversionStrategy.cs" />
-        <Compile Include="Conversion\ObjReader.cs" />
-        <Compile Include="Conversion\ObjToStlConversionStrategy.cs" />
-        <Compile Include="Conversion\StlWriter.cs" />
         <Compile Include="ConverterEntry.cs" />
-        <Compile Include="Documents\ObjDocument.cs" />
-        <Compile Include="Documents\StlDocument.cs" />
+        <Compile Include="MeshFormat\Mesh.cs" />
+        <Compile Include="MeshFormat\ObjFormat.cs" />
+        <Compile Include="MeshFormat\Reader\IMeshFormatReader.cs" />
+        <Compile Include="MeshFormat\Reader\ObjFormatReader.cs" />
+        <Compile Include="MeshFormat\StlFormat.cs" />
+        <Compile Include="MeshFormat\Writer\IMeshFormatWriter.cs" />
+        <Compile Include="MeshFormat\Writer\StlFormatWriter.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Utils\Extensions.cs" />
     </ItemGroup>
