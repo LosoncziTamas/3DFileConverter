@@ -12,6 +12,7 @@ namespace IntegrationTest
             var projectRoot = Path.GetFullPath(Path.Combine(System.AppContext.BaseDirectory, "..", "..", ".."));
             var outputDirPath = $@"{projectRoot}\TestResults";
             var dstPath = $@"{outputDirPath}\{sampleName}.stl";
+            var expectedResultPath = $@"{outputDirPath}\Expected\{sampleName}.stl";
 
             Directory.CreateDirectory(outputDirPath);
             if (File.Exists(dstPath))
@@ -27,7 +28,28 @@ namespace IntegrationTest
                 dstPath
             });
             
-            Assert.True(File.Exists(dstPath));
+            Assert.True(FileContentAreTheSame(dstPath, expectedResultPath));
+        }
+
+        private static bool FileContentAreTheSame(string file1Path, string file2Path)
+        {
+            Assert.True(File.Exists(file1Path));
+            Assert.True(File.Exists(file2Path));
+
+            var file1Content = File.ReadAllBytes(file1Path);
+            var file2Content = File.ReadAllBytes(file2Path);
+            
+            Assert.AreEqual(file1Content.Length, file2Content.Length);
+
+            for(var i = 0; i < file1Content.Length; ++i)
+            {
+                if (file1Content[i] != file2Content[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
         [Test]
